@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://bm6ed875v5la8"]
+
+[ext_resource type="Script" uid="uid://ei4vdtecb1vo" path="res://dropped_item.gd" id="1_24p7l"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_24p7l"]
+
+[node name="DroppedItem" type="Node2D"]
+script = ExtResource("1_24p7l")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+
+[node name="Item" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Item"]
+visibility_layer = 4
+shape = SubResource("CircleShape2D_24p7l")
