@@ -1,0 +1,291 @@
+[gd_scene load_steps=21 format=3 uid="uid://d1l6ht3cpa2i2"]
+
+[ext_resource type="Script" uid="uid://cdgq28a614bhf" path="res://world.gd" id="1_aqk2v"]
+[ext_resource type="Texture2D" uid="uid://bquicgqpytbdr" path="res://sprites001.png" id="1_tlwt5"]
+[ext_resource type="Script" uid="uid://bu2ste5alfdcg" path="res://player.gd" id="2_aqk2v"]
+[ext_resource type="Texture2D" uid="uid://djunh58r4uqfy" path="res://icon.svg" id="3_036b0"]
+[ext_resource type="Script" uid="uid://whwxcprhvd88" path="res://hotbar.gd" id="5_dwbse"]
+[ext_resource type="Texture2D" uid="uid://j7s3ms53obd8" path="res://uisprites.png" id="6_pkg7o"]
+[ext_resource type="Script" uid="uid://bnqc1redmacro" path="res://life_container.gd" id="7_pkg7o"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_dwbse"]
+texture = ExtResource("1_tlwt5")
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+3:0/0 = 0
+3:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+0:1/0 = 0
+0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:1/0 = 0
+1:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:1/0 = 0
+2:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+3:1/0 = 0
+3:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+0:2/0 = 0
+0:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:2/0 = 0
+1:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:2/0 = 0
+2:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:0/0 = 0
+2:0/0 = 0
+4:0/0 = 0
+4:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 0.8093643, 0.8093643, 8, 8, -8, 8)
+5:0/0 = 0
+5:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 0.08992958, 0.2697878, 8, 8, -8, 8)
+6:0/0 = 0
+6:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 0.62950516, 0.2697878, 8, 8, -8, 8)
+7:0/0 = 0
+8:0/0 = 0
+9:0/0 = 0
+9:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-0.8093643, 0.44964695, 8, -8, 8, 8, -8, 8)
+10:0/0 = 0
+10:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(0.2697878, -0.9892225, 8, -8, 8, 8, -8, 8)
+11:0/0 = 0
+11:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-0.2697878, -0.2697878, 8, -8, 8, 8, -8, 8)
+12:0/0 = 0
+6:3/0 = 0
+6:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-6.940794, -6.6951027, 6.8179483, -6.6951027, 6.564843, 8, -6.6951027, 8)
+1:3/0 = 0
+1:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:4/0 = 0
+1:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:5/0 = 0
+1:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+4:1/size_in_atlas = Vector2i(3, 2)
+4:1/0 = 0
+4:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-14.11891, -10.881453, -0.62950516, -15.198063, 3.3273869, -14.478628, 12.859899, -11.061312, 16.81679, -6.0252676, 18.075804, 0.2697878, 17.536226, 4.7662563, 15.018204, 7.4641376, 7.8238544, 10.162018, 2.2482338, 10.162018, 2.428093, 16.097355, -2.428093, 16.097355, -2.2482338, 10.521735, -5.48569, 9.98216, -11.600887, 9.082866, -17.716085, 3.8669624, -18.075802, -3.6871042)
+5:3/0 = 0
+5:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-2.8934774, -8, 2.428093, -8, 3.1325707, 4.7295685, 4.097559, 6.561825, 8, 8, -8, 8, -6.6764426, 6.791059, -3.180623, 5.644889)
+3:2/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_pkg7o"]
+physics_layer_0/collision_layer = 1
+sources/1 = SubResource("TileSetAtlasSource_dwbse")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gbfbk"]
+size = Vector2(12, 32)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_dwbse"]
+load_path = "res://.godot/imported/uisprites.png-fd83a9529537075db77b4319677c2c67.ctex"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pkg7o"]
+atlas = SubResource("CompressedTexture2D_dwbse")
+region = Rect2(16, 96, 16, 16)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_gbfbk"]
+load_path = "res://.godot/imported/uisprites.png-fd83a9529537075db77b4319677c2c67.ctex"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ioo17"]
+atlas = SubResource("CompressedTexture2D_gbfbk")
+region = Rect2(32, 96, 16, 16)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_wse8f"]
+load_path = "res://.godot/imported/uisprites.png-fd83a9529537075db77b4319677c2c67.ctex"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ic0uy"]
+atlas = SubResource("CompressedTexture2D_wse8f")
+region = Rect2(32, 96, 16, 16)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_k3n1d"]
+load_path = "res://.godot/imported/uisprites.png-fd83a9529537075db77b4319677c2c67.ctex"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2o6r5"]
+atlas = SubResource("CompressedTexture2D_k3n1d")
+region = Rect2(32, 96, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_70uel"]
+atlas = ExtResource("6_pkg7o")
+region = Rect2(32, 96, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dwbse"]
+atlas = ExtResource("6_pkg7o")
+region = Rect2(48, 96, 16, 16)
+
+[node name="World" type="Node2D"]
+script = ExtResource("1_aqk2v")
+
+[node name="Terrain" type="TileMapLayer" parent="."]
+tile_set = SubResource("TileSet_pkg7o")
+
+[node name="Player" type="CharacterBody2D" parent="."]
+floor_constant_speed = true
+floor_max_angle = 0.9599311
+floor_snap_length = 8.0
+script = ExtResource("2_aqk2v")
+
+[node name="Sprite2D" type="Sprite2D" parent="Player"]
+position = Vector2(8, -16)
+scale = Vector2(0.125, 0.24999999)
+texture = ExtResource("3_036b0")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
+position = Vector2(8, -16)
+shape = SubResource("RectangleShape2D_gbfbk")
+
+[node name="Camera2D" type="Camera2D" parent="Player"]
+zoom = Vector2(3, 3)
+position_smoothing_enabled = true
+
+[node name="DayNightTimer" type="CanvasModulate" parent="."]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="HUD" type="Control" parent="CanvasLayer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Hotbar" type="HBoxContainer" parent="CanvasLayer/HUD"]
+custom_minimum_size = Vector2(200, 32)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -1.5
+anchor_top = 0.6
+anchor_right = 2.5
+anchor_bottom = 1.0
+offset_left = 60.0
+offset_right = -60.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 2
+alignment = 1
+script = ExtResource("5_dwbse")
+metadata/_edit_use_anchors_ = true
+
+[node name="Slot1" type="TextureRect" parent="CanvasLayer/HUD/Hotbar"]
+custom_minimum_size = Vector2(64, 32.64)
+layout_mode = 2
+texture = SubResource("AtlasTexture_pkg7o")
+stretch_mode = 5
+
+[node name="Slot2" type="TextureRect" parent="CanvasLayer/HUD/Hotbar"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = SubResource("AtlasTexture_pkg7o")
+stretch_mode = 5
+
+[node name="Slot3" type="TextureRect" parent="CanvasLayer/HUD/Hotbar"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = SubResource("AtlasTexture_pkg7o")
+stretch_mode = 5
+
+[node name="Slot4" type="TextureRect" parent="CanvasLayer/HUD/Hotbar"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = SubResource("AtlasTexture_pkg7o")
+stretch_mode = 5
+
+[node name="Slot5" type="TextureRect" parent="CanvasLayer/HUD/Hotbar"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = SubResource("AtlasTexture_pkg7o")
+stretch_mode = 5
+
+[node name="Slot6" type="TextureRect" parent="CanvasLayer/HUD/Hotbar"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = SubResource("AtlasTexture_ioo17")
+stretch_mode = 5
+
+[node name="Slot7" type="TextureRect" parent="CanvasLayer/HUD/Hotbar"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = SubResource("AtlasTexture_ic0uy")
+stretch_mode = 5
+
+[node name="Slot8" type="TextureRect" parent="CanvasLayer/HUD/Hotbar"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = SubResource("AtlasTexture_2o6r5")
+stretch_mode = 5
+
+[node name="Slot9" type="TextureRect" parent="CanvasLayer/HUD/Hotbar"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = SubResource("AtlasTexture_70uel")
+stretch_mode = 5
+
+[node name="LifeContainer" type="HBoxContainer" parent="CanvasLayer/HUD"]
+layout_mode = 1
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/separation = 1
+script = ExtResource("7_pkg7o")
+
+[node name="Heart1" type="TextureRect" parent="CanvasLayer/HUD/LifeContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = SubResource("AtlasTexture_dwbse")
+stretch_mode = 5
+
+[node name="Heart2" type="TextureRect" parent="CanvasLayer/HUD/LifeContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = SubResource("AtlasTexture_dwbse")
+stretch_mode = 5
+
+[node name="Heart3" type="TextureRect" parent="CanvasLayer/HUD/LifeContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = SubResource("AtlasTexture_dwbse")
+stretch_mode = 5
+
+[node name="Heart4" type="TextureRect" parent="CanvasLayer/HUD/LifeContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = SubResource("AtlasTexture_dwbse")
+stretch_mode = 5
+
+[node name="Heart5" type="TextureRect" parent="CanvasLayer/HUD/LifeContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = SubResource("AtlasTexture_dwbse")
+stretch_mode = 5
+
+[node name="Heart6" type="TextureRect" parent="CanvasLayer/HUD/LifeContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = SubResource("AtlasTexture_dwbse")
+stretch_mode = 5
+
+[node name="Heart7" type="TextureRect" parent="CanvasLayer/HUD/LifeContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = SubResource("AtlasTexture_dwbse")
+stretch_mode = 5
+
+[node name="Heart8" type="TextureRect" parent="CanvasLayer/HUD/LifeContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = SubResource("AtlasTexture_dwbse")
+stretch_mode = 5
+
+[node name="Heart9" type="TextureRect" parent="CanvasLayer/HUD/LifeContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = SubResource("AtlasTexture_dwbse")
+stretch_mode = 5
+
+[node name="Heart10" type="TextureRect" parent="CanvasLayer/HUD/LifeContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = SubResource("AtlasTexture_dwbse")
+stretch_mode = 5
+
+[node name="SkyBackground" type="CanvasLayer" parent="."]
+layer = -100
+
+[node name="ColorRect" type="ColorRect" parent="SkyBackground"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0.8901961, 1, 1)
