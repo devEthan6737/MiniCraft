@@ -25,7 +25,7 @@ func configurar(textura_atlas: Vector2i, source_id: int):
 
 func _on_body_entered(body):
 	# Verificamos si es el jugador
-	if body.is_in_group("player"):
+	if body.is_in_group("Player"):
 		# Buscamos la hotbar por grupo (asegúrate de que tu Hotbar esté en el grupo "hotbar")
 		var hotbar = get_tree().get_first_node_in_group("Hotbar")
 		
@@ -37,4 +37,5 @@ func _on_body_entered(body):
 			
 			var exito = hotbar.recolect(textura_recortada)
 			if exito:
+				print("Objeto recogido")
 				queue_free()

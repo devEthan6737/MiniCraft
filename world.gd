@@ -34,8 +34,8 @@ const TRONCO_CORTADO = Vector2i(5, 5)
 
 const ANCHO_MAPA = 100
 const PROFUNDIDAD_MAX = 100
-var limite_izquierdo = -ANCHO_MAPA / 2
-var limite_derecho = ANCHO_MAPA / 2
+var limite_izquierdo = -ANCHO_MAPA / 2.0
+var limite_derecho = ANCHO_MAPA / 2.0
 const DISTANCIA_GENERACION = 20 # Bloques de margen antes de generar
 const BLOQUES_A_AÑADIR = 50
 
@@ -78,9 +78,9 @@ func generar_mundo():
 	
 	var mapa_alturas = {}
 
-	for x in range(-ANCHO_MAPA / 2, ANCHO_MAPA / 2):
+	for x in range(-ANCHO_MAPA / 2.0, ANCHO_MAPA / 2.0):
 		# ACTUALIZACIÓN DE LA BARRA AQUÍ DENTRO
-		var progreso = float(x + ANCHO_MAPA / 2) / ANCHO_MAPA * 100
+		var progreso = float(x + ANCHO_MAPA / 2.0) / ANCHO_MAPA * 100
 		
 		# Accedemos al ProgressBar que está dentro de ChargeLayer
 		# Asegúrate de que la ruta sea correcta (ej: $ChargeLayer/ProgressBar)
@@ -102,7 +102,7 @@ func generar_mundo():
 			terrain.set_cell(Vector2i(x, y), 1, PIEDRA)
 		terrain.set_cell(Vector2i(x, PROFUNDIDAD_MAX), 1, BEDROCK)
 
-	for x in range(-ANCHO_MAPA / 2, (ANCHO_MAPA / 2) - 1):
+	for x in range(-ANCHO_MAPA / 2.0, (ANCHO_MAPA / 2.0) - 1):
 		var alt_act = mapa_alturas[x]
 		var alt_sig = mapa_alturas[x + 1]
 		
@@ -140,7 +140,7 @@ func generar_mundo():
 				
 				terrain.set_cell(Vector2i(x, alt_act - 1), 1, tipo)
 	
-	crear_vetas_en_tramo(-ANCHO_MAPA / 2, ANCHO_MAPA / 2)
+	crear_vetas_en_tramo(-ANCHO_MAPA / 2.0, ANCHO_MAPA / 2.0)
 	
 	# Buscamos la altura del spawn (en x = 0 por ejemplo)
 	var spawn_x = 0

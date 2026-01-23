@@ -2,8 +2,18 @@ extends CharacterBody2D
 
 const SPEED = 100.0
 const JUMP_VELOCITY = -220.0
+var menu_open = false
+
+@onready var anim = $AnimationPlayer
+@onready var sprite = $Sprite2D
 
 func _physics_process(delta: float) -> void:
+	# Si el menú está abierto, no procesamos el movimiento ni el salto
+	if menu_open:
+		velocity.x = move_toward(velocity.x, 0, SPEED) # Frenar suavemente
+		move_and_slide()
+		return # Saltamos el resto de la función
+	
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
@@ -20,6 +30,37 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 
 	move_and_slide()
+	
+	# 5. LLAMAMOS A LAS ANIMACIONES
+	actualizar_animaciones(direction)
+
+var caminando = false
+func actualizar_animaciones(direction):
+	# Voltear sprite
+	if direction > 0:
+		sprite.flip_h = false
+	elif direction < 0:
+		sprite.flip_h = true
+
+	# --- LA CLAVE ESTÁ AQUÍ ---
+	if is_on_floor():
+		# Si estamos en el suelo, OLVIDAMOS el salto/caída por completo
+		if Input.is_key_pressed(KEY_S):
+			anim.play("crouch")
+		elif abs(velocity.x) > 10:
+			# Si NO se está reproduciendo ya la caminata ni la transición
+			if anim.current_animation != "walk" and anim.current_animation != "start_walk":
+				anim.play("start_walk")
+				anim.queue("walk") # Esto pone "walk" en lista de espera automáticamente
+		else:
+			anim.play("idle")
+	else:
+		# Solo entramos aquí si is_on_floor() es FALSE
+		# Añadimos una pequeña zona muerta para la Y
+		if velocity.y < -50: # Solo "salta" si sube con fuerza
+			anim.play("jump")
+		elif velocity.y > 50:
+			anim.play("jump")
 
 @export var range_minado = 40 # Distancia máxima en píxeles
 @onready var terrain = get_node("../Terrain") # "../" sube al padre (World) y busca "Terrain"
@@ -29,6 +70,8 @@ var bloque_actual_siendo_picado = Vector2i(-1, -1)
 func _input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
 		resetear_minado()
+	if event.is_action_pressed("ui_drop") or (event is InputEventKey and event.keycode == KEY_Q and event.pressed):
+		soltar_item_desde_hotbar()
 
 const DIRT_BACKGROUND = Vector2i(12, 0)
 const ROCK_BACKGROUND = Vector2i(3, 2)
@@ -73,18 +116,19 @@ func minar():
 						terrain.set_cell(pos_mapa + Vector2i(0, -1), -1)
 				terrain.set_cell(pos_mapa, -1)
 
-func putBackground (position, type):
+func putBackground (_position, type):
 	if (type == "rock_bkp" || type == "dirt_bkg"):
 		return
 	
 	if (type == 'dirt'):
-		terrain.set_cell(position, 1, DIRT_BACKGROUND)
+		terrain.set_cell(_position, 1, DIRT_BACKGROUND)
 	else:
-		terrain.set_cell(position, 1, ROCK_BACKGROUND)
+		terrain.set_cell(_position, 1, ROCK_BACKGROUND)
 
 @onready var selector = get_node("../Cursor") # Ajusta la ruta a tu nodo
 
 func _process(delta):
+	if menu_open: return
 	actualizar_selector()
 	
 	# Si mantenemos el clic izquierdo pulsado
@@ -92,6 +136,11 @@ func _process(delta):
 		gestionar_proceso_minado(delta)
 	else:
 		resetear_minado()
+	
+	if Input.is_action_just_pressed("ui_undo") or Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+		# Usamos una pequeña flag para no colocar 60 bloques por segundo
+		if Engine.get_frames_drawn() % 10 == 0: # Coloca cada 10 frames si se mantiene
+			place()
 
 func gestionar_proceso_minado(delta):
 	var pos_raton = get_global_mouse_position()
@@ -125,17 +174,35 @@ func resetear_minado():
 	bloque_actual_siendo_picado = Vector2i(-1, -1)
 	selector.rotation = 0 # Quitar vibración
 
+@onready var hotbar = get_tree().get_first_node_in_group("Hotbar")
 func actualizar_selector():
 	var pos_raton = get_global_mouse_position()
-	
-	# 1. Movimiento libre: El sprite sigue al ratón exactamente
+	var pos_mapa = terrain.local_to_map(pos_raton)
 	selector.global_position = pos_raton
 	
-	# 2. Lógica de distancia (sigue siendo igual)
+	# --- LÓGICA DE PREVISUALIZACIÓN ---
+	var preview_sprite = selector.get_node_or_null("Preview")
+	if preview_sprite and hotbar:
+		var slot_actual = hotbar.dataslots[hotbar.slot_seleccionado]
+		
+		if slot_actual["item"] != null:
+			preview_sprite.texture = slot_actual["item"].atlas
+			preview_sprite.region_enabled = true
+			preview_sprite.region_rect = slot_actual["item"].region
+			preview_sprite.scale = Vector2(0.5, 0.5)
+			preview_sprite.modulate = Color(1, 1, 1, 0.5) # Transparente
+			preview_sprite.show()
+			
+			# Ajustar el selector a la rejilla para ver dónde quedará
+			selector.global_position = terrain.map_to_local(pos_mapa)
+		else:
+			preview_sprite.hide()
+
+	# Color de rango
 	if global_position.distance_to(pos_raton) > range_minado:
-		selector.modulate = Color(1, 0, 0, 0.7) # Rojo si está lejos
+		selector.modulate = Color(1, 0, 0, 0.7)
 	else:
-		selector.modulate = Color(1, 1, 1, 0.9) # Blanco si está cerca
+		selector.modulate = Color(1, 1, 1, 0.9)
 
 func soltar_item(pos_mapa, atlas_coords, source_id):
 	var nuevo_item = item_escena.instantiate()
@@ -157,3 +224,66 @@ func soltar_item(pos_mapa, atlas_coords, source_id):
 	# Salto en arco
 	tween.tween_property(nuevo_item, "global_position:x", destino.x, 0.5)
 	tween.tween_property(nuevo_item, "global_position:y", destino.y, 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+func place():
+	var pos_raton = get_global_mouse_position()
+	
+	# 1. Verificar distancia
+	if global_position.distance_to(pos_raton) > range_minado:
+		return
+		
+	var pos_mapa = terrain.local_to_map(pos_raton)
+	
+	# 2. Verificar que el lugar esté vacío (celda -1)
+	if terrain.get_cell_source_id(pos_mapa) != -1:
+		return
+		
+	# 3. Pedir el ítem a la hotbar
+	if hotbar:
+		var slot = hotbar.dataslots[hotbar.slot_seleccionado]
+		if slot["item"] != null and slot["amount"] > 0:
+			# Colocamos el bloque en el TileMap
+			# Usamos los datos guardados en el AtlasTexture del slot
+			var atlas_coords = Vector2i(slot["item"].region.position / 16.0)
+			terrain.set_cell(pos_mapa, 1, atlas_coords)
+			
+			# 4. Restar cantidad
+			slot["amount"] -= 1
+			
+			# 5. Si se acaba, limpiar el slot
+			if slot["amount"] <= 0:
+				slot["item"] = null
+			
+			hotbar.actualizar_interfaz_hotbar()
+
+func soltar_item_desde_hotbar():
+	if not hotbar: return
+	
+	var slot = hotbar.dataslots[hotbar.slot_seleccionado]
+	
+	# Si hay algo que soltar
+	if slot["item"] != null and slot["amount"] > 0:
+		# 1. Instanciar el ítem en el mundo
+		var drop = item_escena.instantiate()
+		get_parent().add_child(drop)
+		
+		# 2. Posicionarlo un poco adelantado al jugador
+		drop.global_position = global_position + Vector2(10 * (3 if velocity.x >= 0 else -3), -5)
+		
+		# 3. Configurarlo (necesitamos sacar atlas_coords del region del slot)
+		var atlas_coords = Vector2i(slot["item"].region.position / 16.0)
+		drop.configurar(atlas_coords, 0) # El 0 es el source_id por defecto
+		
+		# 4. Aplicar un impulso físico visual (usando tu lógica de Tween)
+		var direccion_suelta = 20 if velocity.x >= 0 else -20
+		var destino = drop.global_position + Vector2(direccion_suelta, 5)
+		var tween = create_tween().set_parallel(true)
+		tween.tween_property(drop, "global_position:x", destino.x, 0.4)
+		tween.tween_property(drop, "global_position:y", destino.y, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+		# 5. Restar de la hotbar
+		slot["amount"] -= 1
+		if slot["amount"] <= 0:
+			slot["item"] = null
+		
+		hotbar.actualizar_interfaz_hotbar()

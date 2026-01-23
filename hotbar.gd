@@ -44,26 +44,37 @@ func actualizar_seleccion():
 			s.z_index = 0
 
 var dataslots = [
-	{ "item": null, "locked": false },
-	{ "item": null, "locked": false },
-	{ "item": null, "locked": false },
-	{ "item": null, "locked": false },
-	{ "item": null, "locked": false },
-	{ "item": null, "locked": true },
-	{ "item": null, "locked": true },
-	{ "item": null, "locked": true },
-	{ "item": null, "locked": true }
+	{ "item": null, "locked": false, "amount": 0 },
+	{ "item": null, "locked": false, "amount": 0 },
+	{ "item": null, "locked": false, "amount": 0 },
+	{ "item": null, "locked": false, "amount": 0 },
+	{ "item": null, "locked": false, "amount": 0 },
+	{ "item": null, "locked": true, "amount": 0 },
+	{ "item": null, "locked": true, "amount": 0 },
+	{ "item": null, "locked": true, "amount": 0 },
+	{ "item": null, "locked": true, "amount": 0 }
 ]
 
 func recolect(item_id):
-	# Recorremos los slots buscando uno que no esté bloqueado y esté vacío
+	# Buscar si ya existe el ítem Y tiene espacio para más
+	for i in range(dataslots.size()):
+		var slot = dataslots[i]
+		# Comprobamos: que no esté bloqueado, que tenga el mismo ítem y que no haya llegado a 67
+		if not slot["locked"] and slot["item"] != null:
+			if slot["item"].region == item_id.region and slot["amount"] < 67:
+				slot["amount"] += 1
+				actualizar_interfaz_hotbar()
+				return true
+
+	# Si no se pudo sumar a ningún slot existente, buscar uno vacío
 	for i in range(dataslots.size()):
 		if not dataslots[i]["locked"] and dataslots[i]["item"] == null:
 			dataslots[i]["item"] = item_id
-			actualizar_interfaz_hotbar() # Función para dibujar el item en pantalla
-			return true # Recogido con éxito
+			dataslots[i]["amount"] = 1
+			actualizar_interfaz_hotbar()
+			return true
 			
-	return false # No hay espacio o todos están bloqueados
+	return false # Inventario totalmente lleno
 
 func actualizar_interfaz_hotbar():
 	for i in range(dataslots.size()):
@@ -72,23 +83,39 @@ func actualizar_interfaz_hotbar():
 		var data = dataslots[i]
 		
 		# Buscamos si ya existe un icono dentro del slot
-		var icono = s.get_node_or_null("IconoItem")
+		var icono = s.get_node_or_null("ItemIcon")
+		var label = s.get_node_or_null("AmountLabel")
 		
 		if data["item"] != null:
 			# Si no existe el nodo del icono, lo creamos dinámicamente
 			if icono == null:
 				icono = TextureRect.new()
-				icono.name = "IconoItem"
+				icono.name = "ItemIcon"
 				icono.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 				icono.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 				# Ajustamos el icono al tamaño del slot (puedes variar el offset)
 				icono.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 5)
 				s.add_child(icono)
+				
+				var font = load("res://Monocraft-ttf/Monocraft.ttf")
+				label = Label.new()
+				label.name = "AmountLabel"
+				label.add_theme_font_override("font", font)
+				label.add_theme_font_size_override("font_size", 16)
+				label.add_theme_constant_override("outline_size", 3)
+				label.add_theme_color_override("font_outline_color", Color.BLACK)
+				label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+				label.position.x -= 4
+				s.add_child(label)
 			
 			# Asignamos la textura del bloque (item_id debe ser una Texture)
 			icono.texture = data["item"]
 			icono.show()
+			label.text = str(data["amount"])
+			label.show()
 		else:
 			# Si el slot está vacío y existe el nodo, lo ocultamos
 			if icono != null:
 				icono.hide()
+			if label != null:
+				label.hide()
