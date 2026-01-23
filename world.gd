@@ -5,6 +5,9 @@ extends Node2D
 @onready var player = $Player
 @onready var timer = $DayNightTimer/Timer
 @onready var sky_color = $SkyBackground/ColorRect
+@onready var timer_label = $CanvasLayer/HUD/Cooldown
+@onready var day_label = $CanvasLayer/HUD/Day
+@onready var enemies_label = $CanvasLayer/HUD/Enemies
 
 const CESPED = Vector2i(0, 0)
 const HIERBA_V1 = Vector2i(1, 0)
@@ -34,7 +37,7 @@ const TIERRA_IZQ = Vector2i(13, 0)
 const ARBOL = Vector2i(4, 1)
 const TRONCO_CORTADO = Vector2i(5, 5)
 
-const ANCHO_MAPA = 100
+const ANCHO_MAPA = 500
 const PROFUNDIDAD_MAX = 100
 var limite_izquierdo = -ANCHO_MAPA / 2.0
 var limite_derecho = ANCHO_MAPA / 2.0
@@ -43,6 +46,8 @@ const BLOQUES_A_AÑADIR = 50
 
 var enemigos_vivos = 0
 var es_de_noche = false
+var day = 1
+var spawnable_enemies_amount = 3
 
 func _ready():
 	pantalla_carga.show()
@@ -64,6 +69,10 @@ func _ready():
 	sky_color.color = Color("87ceeb")
 
 func _process(_delta):
+	if !timer.is_stopped():
+		timer_label.text = formatear_tiempo(timer.time_left)
+		day_label.text = "Day " + str(day)
+	
 	if player:
 		# Convertimos la posición global del player a coordenadas de mapa
 		var pos_player_mapa = terrain.local_to_map(player.global_position)
@@ -300,35 +309,78 @@ func hacerse_de_noche():
 	# Tween para cambiar el color a azul oscuro/negro en 2 segundos
 	var tween = create_tween()
 	tween.tween_property(sky_color, "color", Color("0a0a2a"), 2.0)
-	
-	spawn_enemigos(3)
+	enemies_label.text = str(enemigos_vivos) + " Enemies remaining"
+	spawn_enemigos(spawnable_enemies_amount)
 
 func spawn_enemigos(cantidad):
 	for i in range(cantidad):
-		# Instancia tu escena de enemigo (asegúrate de tenerla cargada)
 		var nuevo_enemigo = preload("res://Enemy.tscn").instantiate()
 		
-		# Posición aleatoria cerca del jugador (entre 200 y 300 píxeles de distancia)
-		var angulo = randf() * TAU
-		var distancia = randf_range(200, 300)
-		var offset = Vector2(cos(angulo), sin(angulo)) * distancia
+		var spawn_x_pixels = 0.0
+		var intento_exitoso = false
 		
-		nuevo_enemigo.global_position = player.global_position + offset
+		for intento in range(5):
+			var lado = 1 if randf() > 0.5 else -1
+			# Añadimos i * 20 para que cada enemigo de la tanda 
+			# busque un punto X ligeramente distinto y no se pisen
+			var offset = (randf_range(250, 400) + (i * 20)) * lado 
+			var posible_x = player.global_position.x + offset
+			
+			var min_x_px = limite_izquierdo * 16.0
+			var max_x_px = limite_derecho * 16.0
+			
+			if posible_x > min_x_px and posible_x < max_x_px:
+				spawn_x_pixels = posible_x
+				intento_exitoso = true
+				break
 		
-		# Conectar señal de muerte para llevar la cuenta
-		nuevo_enemigo.tree_exited.connect(_on_enemigo_muerto)
+		if not intento_exitoso:
+			spawn_x_pixels = player.global_position.x + (i * 30) # Separación de emergencia
 		
+		var pos_mapa_x = terrain.local_to_map(Vector2(spawn_x_pixels, 0)).x
+		var suelo_y = encontrar_suelo_en_x(pos_mapa_x)
+		
+		# --- CAMBIO AQUÍ: Aparecen 2 bloques por encima (suelo_y - 2) ---
+		# Así caen con gravedad y evitamos que se fusionen con el césped
+		nuevo_enemigo.global_position = terrain.map_to_local(Vector2i(pos_mapa_x, suelo_y - 2))
+		
+		# Evitamos que el nombre de la señal sea genérico para evitar errores de conexión
+		if not nuevo_enemigo.tree_exited.is_connected(_on_enemigo_muerto):
+			nuevo_enemigo.tree_exited.connect(_on_enemigo_muerto)
+			
 		add_child(nuevo_enemigo)
+		
 		enemigos_vivos += 1
+		enemies_label.text = str(enemigos_vivos) + " Enemies remaining"
+
+# Función auxiliar para encontrar donde hay bloques
+func encontrar_suelo_en_x(x_mapa: int) -> int:
+	# Escaneamos desde el cielo hacia abajo hasta encontrar algo que no sea aire (-1)
+	for y in range(-50, PROFUNDIDAD_MAX):
+		if terrain.get_cell_source_id(Vector2i(x_mapa, y)) != -1:
+			return y
+	return 0 # Por si acaso no encuentra nada
 
 func _on_enemigo_muerto():
 	enemigos_vivos -= 1
+	enemies_label.text = str(enemigos_vivos) + " Enemies remaining"
 
 func amanecer_rapido():
 	es_de_noche = false
+	enemies_label.text = ""
+	day += 1
+	spawnable_enemies_amount = spawnable_enemies_amount + day
 	var tween = create_tween()
 	# Vuelve al azul claro rápido (en 1 segundo)
 	tween.tween_property(sky_color, "color", Color("87ceeb"), 1.0)
 	
 	# Reiniciar el cooldown de 5 minutos
 	timer.start()
+
+func formatear_tiempo(segundos_totales: float) -> String:
+	# Calculamos minutos y segundos usando división entera y resto
+	var minutos : int = int(segundos_totales) / 60
+	var segundos : int = int(segundos_totales) % 60
+	
+	# El formato "%02d" asegura que siempre haya 2 dígitos (ej: 05:01 en vez de 5:1)
+	return "%02d:%02d" % [minutos, segundos]

@@ -87,7 +87,7 @@ func atacar_o_minar():
 	if resultados.size() > 0:
 		var objeto = resultados[0].collider
 		if objeto.has_method("recibir_daño"):
-			objeto.recibir_daño(25)
+			objeto.recibir_daño(100)
 			# Animación rápida de golpe
 			anim.play("walk") 
 			return # No picamos el bloque si golpeamos a alguien

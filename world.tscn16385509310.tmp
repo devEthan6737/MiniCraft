@@ -108,6 +108,10 @@ texture = ExtResource("1_tlwt5")
 3:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-7.020293, -7.0202937, 6.962985, -6.9629846, 6.9056764, 8, -7.020294, 8)
 3:3/0/custom_data_0 = "chest"
 3:3/0/custom_data_1 = 2
+5:5/0 = 0
+5:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-1.0602083, -8, 0.9235668, -8, 1.0656543, -7.033318, 1.9655399, -6.796506, 2.0129027, -4.807285, 2.8180635, -4.90201, 2.9601507, 4.90201, 8, 8, -8, 8, -3.1022382, 5.044097, -2.980935, -5.012783, -1.9917458, -5.0662527, -1.9115413, -6.9911613, -0.9758216, -6.9911613)
+5:5/0/custom_data_0 = "basetree"
+5:5/0/custom_data_1 = 2
 4:1/size_in_atlas = Vector2i(3, 4)
 4:1/0 = 0
 4:1/0/texture_origin = Vector2i(0, 8)
@@ -115,12 +119,11 @@ texture = ExtResource("1_tlwt5")
 4:1/0/physics_layer_1/polygon_0/points = PackedVector2Array(-13.399474, -34.08323, 0.6295061, -39.299133, 16.097355, -32.4645, 16.457073, -17.716084, 2.7878103, -14.118912, 2.7878113, 20.95354, 7.731778, 24.027452, -7.801121, 23.888765, -2.9676685, 20.95354, -2.9676685, -13.939053, -13.399475, -17.176508, -18.075802, -23.471563)
 4:1/0/custom_data_0 = "tree"
 4:1/0/custom_data_1 = 3
-5:5/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_pkg7o"]
 physics_layer_0/collision_layer = 1
-physics_layer_1/collision_layer = 4
-physics_layer_1/collision_mask = 4
+physics_layer_1/collision_layer = 2
+physics_layer_1/collision_mask = 2
 physics_layer_1/collision_priority = 0.0
 custom_data_layer_0/name = "object_type"
 custom_data_layer_0/type = 4
@@ -357,7 +360,7 @@ libraries = {
 [node name="DayNightTimer" type="CanvasModulate" parent="."]
 
 [node name="Timer" type="Timer" parent="DayNightTimer"]
-wait_time = 5.0
+wait_time = 10.0
 one_shot = true
 autostart = true
 

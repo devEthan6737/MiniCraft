@@ -9,8 +9,8 @@ atlas = ExtResource("2_2hac7")
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_wse8f"]
 radius = 5.0
 
-[sub_resource type="Animation" id="Animation_hiqwa"]
-resource_name = "walk"
+[sub_resource type="Animation" id="Animation_2u3nc"]
+length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -24,8 +24,8 @@ tracks/0/keys = {
 "values": [0]
 }
 
-[sub_resource type="Animation" id="Animation_2u3nc"]
-length = 0.001
+[sub_resource type="Animation" id="Animation_hiqwa"]
+resource_name = "walk"
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -52,6 +52,9 @@ height = 38.0
 [node name="Enemy" type="CharacterBody2D"]
 collision_layer = 2
 collision_mask = 3
+floor_constant_speed = true
+floor_max_angle = 1.0471976
+floor_snap_length = 10.0
 script = ExtResource("1_s7bn3")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
