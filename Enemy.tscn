@@ -45,9 +45,8 @@ _data = {
 &"walk": SubResource("Animation_hiqwa")
 }
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ic0uy"]
-radius = 15.0
-height = 38.0
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_s7bn3"]
+size = Vector2(82, 18)
 
 [node name="Enemy" type="CharacterBody2D"]
 collision_layer = 2
@@ -75,7 +74,8 @@ libraries = {
 collision_layer = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AreaAtaque"]
-shape = SubResource("CapsuleShape2D_ic0uy")
+position = Vector2(6, 1)
+shape = SubResource("RectangleShape2D_s7bn3")
 
 [node name="RayCast2D" type="RayCast2D" parent="."]
 target_position = Vector2(10, 0)

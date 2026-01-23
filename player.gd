@@ -309,3 +309,22 @@ func soltar_item_desde_hotbar():
 			slot["item"] = null
 		
 		hotbar.actualizar_interfaz_hotbar()
+
+@onready var life_container = get_node("../CanvasLayer/HUD/LifeContainer")
+
+func recibir_daño(cantidad):
+	# 1. Llamamos a tu script de la interfaz para que reste vida y tiemble
+	life_container.recibir_danio(cantidad)
+	
+	# 2. Efecto visual en el sprite del jugador
+	var tween = create_tween()
+	tween.tween_property(sprite, "modulate", Color.RED, 0.1)
+	tween.tween_property(sprite, "modulate", Color.WHITE, 0.1)
+	
+	# 3. Comprobamos si el jugador ha muerto usando la vida del LifeContainer
+	if life_container.vida_actual <= 0:
+		morir()
+
+func morir():
+	# Puedes cambiar esto por una animación de muerte o pantalla de Game Over
+	get_tree().reload_current_scene()

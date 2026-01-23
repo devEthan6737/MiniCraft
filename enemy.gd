@@ -3,8 +3,11 @@ extends CharacterBody2D
 var SPEED = 50.0 
 var vida = 100
 var JUMP_VELOCITY = -300.0
+var damage = 1
+var can_attack = 1
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
+@onready var attack_cooldown = 1.0
 @onready var player = get_tree().get_first_node_in_group("Player")
 @onready var anim = $AnimationPlayer
 @onready var sprite = $Sprite2D
@@ -52,8 +55,11 @@ func _physics_process(delta):
 			velocity.y = JUMP_VELOCITY
 	else:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
-
+	
 	move_and_slide()
+	
+	if player and can_attack:
+		revisar_contacto_jugador()
 
 func recibir_daño(cantidad):
 	vida -= cantidad
@@ -65,3 +71,23 @@ func recibir_daño(cantidad):
 
 func morir():
 	queue_free()
+
+func revisar_contacto_jugador():
+	# Obtenemos los cuerpos que están dentro del Area2D del enemigo
+	var cuerpos = $AreaAtaque.get_overlapping_bodies()
+	
+	for cuerpo in cuerpos:
+		if cuerpo.is_in_group("Player"):
+			atacar(cuerpo)
+			break
+
+func atacar(objetivo):
+	can_attack = false
+	
+	# Aplicamos el daño al jugador
+	if objetivo.has_method("recibir_daño"):
+		objetivo.recibir_daño(damage)
+	
+	# Esperamos el cooldown antes de poder atacar de nuevo
+	await get_tree().create_timer(attack_cooldown).timeout
+	can_attack = true
