@@ -68,10 +68,29 @@ var tiempo_actual_minado = 0.0
 var bloque_actual_siendo_picado = Vector2i(-1, -1)
 
 func _input(event):
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		atacar_o_minar()
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
 		resetear_minado()
 	if event is InputEventKey and event.keycode == KEY_Q and event.pressed:
 		soltar_item_desde_hotbar()
+
+func atacar_o_minar():
+	# 1. Detección física en el punto del selector (Capa 2: Enemigos)
+	var espacio_fisico = get_world_2d().direct_space_state
+	var parametros = PhysicsPointQueryParameters2D.new()
+	parametros.position = selector.global_position
+	parametros.collision_mask = 2 # Asegúrate de que tus enemigos estén en la Layer 2
+	
+	var resultados = espacio_fisico.intersect_point(parametros)
+	
+	if resultados.size() > 0:
+		var objeto = resultados[0].collider
+		if objeto.has_method("recibir_daño"):
+			objeto.recibir_daño(25)
+			# Animación rápida de golpe
+			anim.play("walk") 
+			return # No picamos el bloque si golpeamos a alguien
 
 const DIRT_BACKGROUND = Vector2i(12, 0)
 const ROCK_BACKGROUND = Vector2i(3, 2)
@@ -191,7 +210,7 @@ func actualizar_selector():
 			preview_sprite.show()
 			
 			# Ajustar el selector a la rejilla para ver dónde quedará
-			selector.global_position = terrain.map_to_local(pos_mapa)
+			# selector.global_position = terrain.map_to_local(pos_mapa)
 		else:
 			preview_sprite.hide()
 

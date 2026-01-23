@@ -1,0 +1,75 @@
+[gd_scene load_steps=9 format=3 uid="uid://deydrr56axgxk"]
+
+[ext_resource type="Script" uid="uid://lgpf6yu4gkx5" path="res://enemy.gd" id="1_s7bn3"]
+[ext_resource type="Texture2D" uid="uid://bcrvy6gvkgelp" path="res://animations.png" id="2_2hac7"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_udxuc"]
+atlas = ExtResource("2_2hac7")
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_wse8f"]
+radius = 5.0
+
+[sub_resource type="Animation" id="Animation_hiqwa"]
+resource_name = "walk"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_2u3nc"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_2u3nc"]
+_data = {
+&"RESET": SubResource("Animation_2u3nc"),
+&"walk": SubResource("Animation_hiqwa")
+}
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ic0uy"]
+radius = 15.0
+height = 38.0
+
+[node name="Enemy" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_s7bn3")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_udxuc")
+hframes = 8
+vframes = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_wse8f")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+root_node = NodePath("../CollisionShape2D")
+libraries = {
+&"": SubResource("AnimationLibrary_2u3nc")
+}
+
+[node name="AreaAtaque" type="Area2D" parent="."]
+collision_layer = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AreaAtaque"]
+shape = SubResource("CapsuleShape2D_ic0uy")

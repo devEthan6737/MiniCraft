@@ -3,6 +3,8 @@ extends Node2D
 @onready var terrain = $Terrain
 @onready var pantalla_carga = $ChargeLayer
 @onready var player = $Player
+@onready var timer = $DayNightTimer/Timer
+@onready var sky_color = $SkyBackground/ColorRect
 
 const CESPED = Vector2i(0, 0)
 const HIERBA_V1 = Vector2i(1, 0)
@@ -39,6 +41,9 @@ var limite_derecho = ANCHO_MAPA / 2.0
 const DISTANCIA_GENERACION = 20 # Bloques de margen antes de generar
 const BLOQUES_A_AÑADIR = 50
 
+var enemigos_vivos = 0
+var es_de_noche = false
+
 func _ready():
 	pantalla_carga.show()
 	
@@ -54,6 +59,9 @@ func _ready():
 	generar_mundo()
 	# Oculta el cursor del sistema y lo "atrapa" en la ventana
 	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
+	
+	timer.timeout.connect(_on_timer_timeout)
+	sky_color.color = Color("87ceeb")
 
 func _process(_delta):
 	if player:
@@ -69,6 +77,9 @@ func _process(_delta):
 		if pos_player_mapa.x < limite_izquierdo + DISTANCIA_GENERACION:
 			generar_tramo(limite_izquierdo - BLOQUES_A_AÑADIR, limite_izquierdo)
 			limite_izquierdo -= BLOQUES_A_AÑADIR
+	
+	if es_de_noche and enemigos_vivos <= 0:
+		amanecer_rapido()
 
 var noise = FastNoiseLite.new()
 
@@ -280,3 +291,44 @@ func finalizar_carga():
 func _input(event):
 	if event is InputEventKey and event.pressed and event.keycode == KEY_H:
 		contenedor_vida.recibir_danio(1)
+
+func _on_timer_timeout():
+	hacerse_de_noche()
+
+func hacerse_de_noche():
+	es_de_noche = true
+	# Tween para cambiar el color a azul oscuro/negro en 2 segundos
+	var tween = create_tween()
+	tween.tween_property(sky_color, "color", Color("0a0a2a"), 2.0)
+	
+	spawn_enemigos(3)
+
+func spawn_enemigos(cantidad):
+	for i in range(cantidad):
+		# Instancia tu escena de enemigo (asegúrate de tenerla cargada)
+		var nuevo_enemigo = preload("res://Enemy.tscn").instantiate()
+		
+		# Posición aleatoria cerca del jugador (entre 200 y 300 píxeles de distancia)
+		var angulo = randf() * TAU
+		var distancia = randf_range(200, 300)
+		var offset = Vector2(cos(angulo), sin(angulo)) * distancia
+		
+		nuevo_enemigo.global_position = player.global_position + offset
+		
+		# Conectar señal de muerte para llevar la cuenta
+		nuevo_enemigo.tree_exited.connect(_on_enemigo_muerto)
+		
+		add_child(nuevo_enemigo)
+		enemigos_vivos += 1
+
+func _on_enemigo_muerto():
+	enemigos_vivos -= 1
+
+func amanecer_rapido():
+	es_de_noche = false
+	var tween = create_tween()
+	# Vuelve al azul claro rápido (en 1 segundo)
+	tween.tween_property(sky_color, "color", Color("87ceeb"), 1.0)
+	
+	# Reiniciar el cooldown de 5 minutos
+	timer.start()

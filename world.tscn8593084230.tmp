@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=3 uid="uid://d1l6ht3cpa2i2"]
+[gd_scene load_steps=40 format=3 uid="uid://d1l6ht3cpa2i2"]
 
 [ext_resource type="Script" uid="uid://cdgq28a614bhf" path="res://world.gd" id="1_aqk2v"]
 [ext_resource type="Texture2D" uid="uid://ctvlxeiq7m0ap" path="res://sprites001.png" id="1_tlwt5"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://j7s3ms53obd8" path="res://uisprites.png" id="7_ioo17"]
 [ext_resource type="Script" uid="uid://bnqc1redmacro" path="res://life_container.gd" id="7_pkg7o"]
 [ext_resource type="Script" uid="uid://d26n5uulqlngi" path="res://crafting_menu.gd" id="9_ioo17"]
+[ext_resource type="PackedScene" uid="uid://deydrr56axgxk" path="res://Enemy.tscn" id="10_wse8f"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_dwbse"]
 texture = ExtResource("1_tlwt5")
@@ -154,19 +155,19 @@ tracks/0/keys = {
 
 [sub_resource type="Animation" id="Animation_ic0uy"]
 resource_name = "idle"
-length = 4.5
+length = 4.0
 loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/path = NodePath("Sprite2D:frame")
-tracks/0/interp = 0
+tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 1, 2, 3, 4),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
-"update": 1,
-"values": [0, 1, 2, 0, 3]
+"times": PackedFloat32Array(0, 1, 2, 3),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [0, 1, 2, 3]
 }
 
 [sub_resource type="Animation" id="Animation_ioo17"]
@@ -694,3 +695,5 @@ anchor_bottom = 1.0
 offset_top = -27.0
 grow_horizontal = 2
 grow_vertical = 0
+
+[node name="Enemy" parent="." instance=ExtResource("10_wse8f")]
