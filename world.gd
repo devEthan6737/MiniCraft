@@ -42,7 +42,7 @@ const PROFUNDIDAD_MAX = 100
 var limite_izquierdo = -ANCHO_MAPA / 2.0
 var limite_derecho = ANCHO_MAPA / 2.0
 const DISTANCIA_GENERACION = 20 # Bloques de margen antes de generar
-const BLOQUES_A_AÑADIR = 50
+const BLOQUES_A_AÑADIR = 100
 
 var enemigos_vivos = 0
 var es_de_noche = false
@@ -306,6 +306,7 @@ func _on_timer_timeout():
 
 func hacerse_de_noche():
 	es_de_noche = true
+	enemigos_vivos = spawnable_enemies_amount
 	# Tween para cambiar el color a azul oscuro/negro en 2 segundos
 	var tween = create_tween()
 	tween.tween_property(sky_color, "color", Color("0a0a2a"), 2.0)
@@ -314,6 +315,8 @@ func hacerse_de_noche():
 
 func spawn_enemigos(cantidad):
 	for i in range(cantidad):
+		await get_tree().create_timer(1).timeout
+
 		var nuevo_enemigo = preload("res://Enemy.tscn").instantiate()
 		
 		var spawn_x_pixels = 0.0
@@ -349,9 +352,7 @@ func spawn_enemigos(cantidad):
 			nuevo_enemigo.tree_exited.connect(_on_enemigo_muerto)
 			
 		add_child(nuevo_enemigo)
-		
-		enemigos_vivos += 1
-		enemies_label.text = str(enemigos_vivos) + " Enemies remaining"
+		print("Enemy spawned: " + str(pos_mapa_x) + ":" + str(suelo_y))
 
 # Función auxiliar para encontrar donde hay bloques
 func encontrar_suelo_en_x(x_mapa: int) -> int:

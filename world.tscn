@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://bcrvy6gvkgelp" path="res://animations.png" id="4_ioo17"]
 [ext_resource type="Script" uid="uid://whwxcprhvd88" path="res://hotbar.gd" id="5_dwbse"]
 [ext_resource type="FontFile" uid="uid://dn0lu4a6c01rq" path="res://Monocraft-ttf/Monocraft.ttf" id="7_gbfbk"]
-[ext_resource type="Texture2D" uid="uid://j7s3ms53obd8" path="res://uisprites.png" id="7_ioo17"]
+[ext_resource type="Texture2D" uid="uid://xh1iyxpxpce8" path="res://uisprites.png" id="7_ioo17"]
 [ext_resource type="Script" uid="uid://bnqc1redmacro" path="res://life_container.gd" id="7_pkg7o"]
 [ext_resource type="Script" uid="uid://d26n5uulqlngi" path="res://crafting_menu.gd" id="9_ioo17"]
 
@@ -182,6 +182,22 @@ tracks/0/keys = {
 "values": [24, 25, 26]
 }
 
+[sub_resource type="Animation" id="Animation_70uel"]
+resource_name = "shift"
+length = 9.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3, 3.9, 4.5, 5.1868753, 5.766667, 6.3, 7.0891857, 7.8829556, 8.433333),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [17, 16, 17, 5, 0, 3, 0, 1, 2, 5]
+}
+
 [sub_resource type="Animation" id="Animation_2o6r5"]
 resource_name = "start_walk"
 length = 0.1
@@ -213,22 +229,6 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
 "update": 0,
 "values": [8, 9, 10, 9, 8, 11]
-}
-
-[sub_resource type="Animation" id="Animation_70uel"]
-resource_name = "shift"
-length = 9.0
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
-tracks/0/interp = 0
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.3, 3.9, 4.5, 5.1868753, 5.766667, 6.3, 7.0891857, 7.8829556, 8.433333),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
-"update": 1,
-"values": [17, 16, 17, 5, 0, 3, 0, 1, 2, 5]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_2o6r5"]
@@ -685,9 +685,9 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -20.0
+offset_left = -106.0
 offset_top = 30.0
-offset_right = 20.0
+offset_right = -66.0
 offset_bottom = 53.0
 grow_horizontal = 2
 scale = Vector2(2, 2)

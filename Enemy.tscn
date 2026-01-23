@@ -76,3 +76,6 @@ collision_layer = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AreaAtaque"]
 shape = SubResource("CapsuleShape2D_ic0uy")
+
+[node name="RayCast2D" type="RayCast2D" parent="."]
+target_position = Vector2(10, 0)
