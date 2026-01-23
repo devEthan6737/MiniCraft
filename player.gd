@@ -46,7 +46,7 @@ func actualizar_animaciones(direction):
 	if is_on_floor():
 		# Si estamos en el suelo, OLVIDAMOS el salto/caída por completo
 		if Input.is_key_pressed(KEY_S):
-			anim.play("crouch")
+			anim.play("shift")
 		elif abs(velocity.x) > 10:
 			# Si NO se está reproduciendo ya la caminata ni la transición
 			if anim.current_animation != "walk" and anim.current_animation != "start_walk":
@@ -70,7 +70,7 @@ var bloque_actual_siendo_picado = Vector2i(-1, -1)
 func _input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
 		resetear_minado()
-	if event.is_action_pressed("ui_drop") or (event is InputEventKey and event.keycode == KEY_Q and event.pressed):
+	if event is InputEventKey and event.keycode == KEY_Q and event.pressed:
 		soltar_item_desde_hotbar()
 
 const DIRT_BACKGROUND = Vector2i(12, 0)
@@ -92,7 +92,7 @@ func minar():
 		# Leemos el Custom Data que configuramos en el TileSet
 		var tipo = tile_data.get_custom_data("object_type")
 		
-		if (tipo == 'baserock'):
+		if (tipo == 'baserock' || tipo == 'dirt_bkg' || tipo == 'rock_bkg'):
 			print("No es posible picar: ", tipo)
 			return
 		else:
@@ -117,9 +117,6 @@ func minar():
 				terrain.set_cell(pos_mapa, -1)
 
 func putBackground (_position, type):
-	if (type == "rock_bkp" || type == "dirt_bkg"):
-		return
-	
 	if (type == 'dirt'):
 		terrain.set_cell(_position, 1, DIRT_BACKGROUND)
 	else:
@@ -233,10 +230,16 @@ func place():
 		return
 		
 	var pos_mapa = terrain.local_to_map(pos_raton)
-	
-	# 2. Verificar que el lugar esté vacío (celda -1)
-	if terrain.get_cell_source_id(pos_mapa) != -1:
-		return
+	var actual = terrain.get_cell_tile_data(pos_mapa)
+
+	if actual:
+		var tipo = actual.get_custom_data("object_type")
+		# Si es fondo, se puede sustituir
+		if tipo == "dirt_bkg" or tipo == "rock_bkg":
+			pass
+		else:
+			return
+
 		
 	# 3. Pedir el ítem a la hotbar
 	if hotbar:
