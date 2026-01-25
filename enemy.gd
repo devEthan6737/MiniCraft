@@ -13,13 +13,10 @@ var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 @onready var sprite = $Sprite2D
 @onready var detector_pared = $RayCast2D # Referencia al nuevo nodo
 
-func _ready():
-	anim.play("walk")
-
 func _physics_process(delta):
 	if not is_on_floor():
 		velocity.y += gravity * delta
-
+		
 	if player:
 		# Calculamos la distancia real entre centros
 		var diff_x = player.global_position.x - global_position.x
@@ -48,15 +45,20 @@ func _physics_process(delta):
 			var col = detector_pared.get_collider()
 			if col is TileMap or col is TileMapLayer:
 				velocity.y = JUMP_VELOCITY
+				anim.play("jump")
 		
 		# SALTO VERTICAL: Corregido (Si está entre 10 y 50 px de distancia y tú arriba)
 		var dist = abs(diff_x)
 		if is_on_floor() and dist < 50 and dist > 10 and player.global_position.y < global_position.y - 40:
 			velocity.y = JUMP_VELOCITY
+			anim.play("jump")
 	else:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
+		anim.play("walk")
 	
 	move_and_slide()
+	
+	actualizar_animaciones()
 	
 	if player and can_attack:
 		revisar_contacto_jugador()
@@ -78,6 +80,11 @@ func revisar_contacto_jugador():
 	
 	for cuerpo in cuerpos:
 		if cuerpo.is_in_group("Player"):
+			if (anim.current_animation == "idle"):
+				anim.play("transition")
+				anim.queue("attack")
+			else:
+				anim.play("attack")
 			atacar(cuerpo)
 			break
 
@@ -91,3 +98,29 @@ func atacar(objetivo):
 	# Esperamos el cooldown antes de poder atacar de nuevo
 	await get_tree().create_timer(attack_cooldown).timeout
 	can_attack = true
+
+func actualizar_animaciones():
+	if anim.current_animation == "attack" or anim.current_animation == "transition":
+		return
+	
+	if not is_on_floor():
+		if anim.current_animation != "jump":
+			# Si venimos de estar quietos, pasamos por transición
+			lanzar_animacion_con_logica("jump")
+	else:
+		if abs(velocity.x) > 1:
+			if anim.current_animation != "walk":
+				lanzar_animacion_con_logica("walk")
+		else:
+			if anim.current_animation != "idle":
+				lanzar_animacion_con_logica("idle")
+
+func lanzar_animacion_con_logica(nombre_nueva_anim):
+	if anim.current_animation == "idle" and nombre_nueva_anim != "idle":
+		anim.play("transition")
+		anim.queue(nombre_nueva_anim)
+	elif ["attack", "jump", "walk"].has(anim.current_animation) and nombre_nueva_anim == "idle":
+		anim.play("transition")
+		anim.queue("idle")
+	else:
+		anim.play(nombre_nueva_anim)

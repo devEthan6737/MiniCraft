@@ -1,10 +1,10 @@
-[gd_scene load_steps=9 format=3 uid="uid://deydrr56axgxk"]
+[gd_scene load_steps=13 format=3 uid="uid://deydrr56axgxk"]
 
 [ext_resource type="Script" uid="uid://lgpf6yu4gkx5" path="res://enemy.gd" id="1_s7bn3"]
-[ext_resource type="Texture2D" uid="uid://bcrvy6gvkgelp" path="res://animations.png" id="2_2hac7"]
+[ext_resource type="Texture2D" uid="uid://c6b3rlep1l3e8" path="res://enemyanimations.png" id="2_s7bn3"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_udxuc"]
-atlas = ExtResource("2_2hac7")
+atlas = ExtResource("2_s7bn3")
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_wse8f"]
 radius = 5.0
@@ -24,8 +24,73 @@ tracks/0/keys = {
 "values": [0]
 }
 
+[sub_resource type="Animation" id="Animation_e6d4v"]
+resource_name = "attack"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../Sprite2D:frame")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.03333334, 0.20000002),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [8, 16, 8]
+}
+
+[sub_resource type="Animation" id="Animation_2hac7"]
+resource_name = "idle"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../Sprite2D:frame")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.43333334),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [0, 1]
+}
+
+[sub_resource type="Animation" id="Animation_s7bn3"]
+resource_name = "jump"
+length = 5.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../Sprite2D:frame")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.20000002),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [24, 25, 26]
+}
+
 [sub_resource type="Animation" id="Animation_hiqwa"]
 resource_name = "walk"
+length = 1.25
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../Sprite2D:frame")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5, 0.75, 1),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 1,
+"values": [8, 9, 10, 8, 11]
+}
+
+[sub_resource type="Animation" id="Animation_qp131"]
+resource_name = "transition"
+length = 0.25
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -36,12 +101,16 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [0]
+"values": [5]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_2u3nc"]
 _data = {
 &"RESET": SubResource("Animation_2u3nc"),
+&"attack": SubResource("Animation_e6d4v"),
+&"idle": SubResource("Animation_2hac7"),
+&"jump": SubResource("Animation_s7bn3"),
+&"transition": SubResource("Animation_qp131"),
 &"walk": SubResource("Animation_hiqwa")
 }
 
