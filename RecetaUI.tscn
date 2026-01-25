@@ -15,12 +15,14 @@ offset_right = 150.0
 offset_bottom = 50.0
 
 [node name="Label" type="Label" parent="."]
+texture_filter = 1
 layout_mode = 0
 offset_left = 10.0
 offset_top = 10.0
 offset_right = 91.0
 offset_bottom = 33.0
 label_settings = SubResource("LabelSettings_svn8l")
+text_overrun_behavior = 3
 
 [node name="TextureRect" type="TextureRect" parent="."]
 texture_filter = 1

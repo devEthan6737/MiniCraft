@@ -377,6 +377,8 @@ func amanecer_rapido():
 	
 	# Reiniciar el cooldown de 5 minutos
 	timer.start()
+	
+	hotbar.unlock_by_day(day)
 
 func formatear_tiempo(segundos_totales: float) -> String:
 	# Calculamos minutos y segundos usando división entera y resto

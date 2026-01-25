@@ -21,7 +21,7 @@ const SPRITE_SHEET = preload("res://sprites001.png")
 const TILE_SIZE = 16
 var recetas = [
 	{
-		"name": "chest",
+		"name": "Chest",
 		"icon": Vector2i(3, 3),
 		"recipe": [
 			{
@@ -44,10 +44,220 @@ var recetas = [
 		]
 	},
 	{
-		"name": "furnace",
+		"name": "Furnace",
 		"icon": Vector2i(1, 2),
-		"recipe": []
-	}
+		"recipe": [
+			{
+				"id": "rock",
+				"vector": Vector2i(0, 1)
+			},
+			{
+				"id": "rock",
+				"vector": Vector2i(0, 1)
+			},
+			{
+				"id": "rock",
+				"vector": Vector2i(0, 1)
+			},
+			{
+				"id": "rock",
+				"vector": Vector2i(0, 1)
+			},
+			null,
+			{
+				"id": "rock",
+				"vector": Vector2i(0, 1)
+			},
+			{
+				"id": "rock",
+				"vector": Vector2i(0, 1)
+			},
+			null,
+			{
+				"id": "rock",
+				"vector": Vector2i(0, 1)
+			}
+		]
+	},
+	{
+		"name": "Wooden Pickaxe",
+		"icon": Vector2i(4, 6),
+		"recipe": [
+			{
+				"id": "wood",
+				"vector": Vector2i(7, 4)
+			},
+			{
+				"id": "wood",
+				"vector": Vector2i(7, 4)
+			},
+			{
+				"id": "wood",
+				"vector": Vector2i(7, 4)
+			},
+			null,
+			{
+				"id": "stick",
+				"vector": Vector2i(7, 3)
+			},
+			null,
+			null,
+			{
+				"id": "stick",
+				"vector": Vector2i(7, 3)
+			},
+			null
+		]
+	},
+	{
+		"name": "Stone Pickaxe",
+		"icon": Vector2i(3, 6),
+		"recipe": [
+			{
+				"id": "rock",
+				"vector": Vector2i(0, 1)
+			},
+			{
+				"id": "rock",
+				"vector": Vector2i(0, 1)
+			},
+			{
+				"id": "rock",
+				"vector": Vector2i(0, 1)
+			},
+			null,
+			{
+				"id": "stick",
+				"vector": Vector2i(7, 3)
+			},
+			null,
+			null,
+			{
+				"id": "stick",
+				"vector": Vector2i(7, 3)
+			},
+			null
+		]
+	},
+	{
+		"name": "Iron Pickaxe",
+		"icon": Vector2i(2, 6),
+		"recipe": [
+			{
+				"id": "iron",
+				"vector": Vector2i(4, 5)
+			},
+			{
+				"id": "iron",
+				"vector": Vector2i(4, 5)
+			},
+			{
+				"id": "iron",
+				"vector": Vector2i(4, 5)
+			},
+			null,
+			{
+				"id": "stick",
+				"vector": Vector2i(7, 3)
+			},
+			null,
+			null,
+			{
+				"id": "stick",
+				"vector": Vector2i(7, 3)
+			},
+			null
+		]
+	},
+	{
+		"name": "Wooden Sword",
+		"icon": Vector2i(4, 7),
+		"recipe": [
+			null,
+			{
+				"id": "wood",
+				"vector": Vector2i(7, 4)
+			},
+			null,
+			null,
+			{
+				"id": "wood",
+				"vector": Vector2i(7, 4)
+			},
+			null,
+			null,
+			{
+				"id": "stick",
+				"vector": Vector2i(7, 3)
+			},
+			null
+		]
+	},
+	{
+		"name": "Iron Sword",
+		"icon": Vector2i(3, 7),
+		"recipe": [
+			null,
+			{
+				"id": "iron",
+				"vector": Vector2i(4, 5)
+			},
+			null,
+			null,
+			{
+				"id": "iron",
+				"vector": Vector2i(4, 5)
+			},
+			null,
+			null,
+			{
+				"id": "stick",
+				"vector": Vector2i(7, 3)
+			},
+			null
+		]
+	},
+	{
+		"name": "Diamond Sword",
+		"icon": Vector2i(2, 7),
+		"recipe": [
+			null,
+			{
+				"id": "diamond",
+				"vector": Vector2i(3, 4)
+			},
+			null,
+			null,
+			{
+				"id": "diamond",
+				"vector": Vector2i(3, 4)
+			},
+			null,
+			null,
+			{
+				"id": "stick",
+				"vector": Vector2i(7, 3)
+			},
+			null
+		]
+	},
+	{
+		"name": "Golden Carrot Bar",
+		"icon": Vector2i(6, 6),
+		"recipe": [
+			null,
+			{
+				"id": "carrotbar",
+				"vector": Vector2i(6, 5)
+			},
+			null,
+			null,
+			{
+				"id": "gold",
+				"vector": Vector2i(3, 5)
+			}
+		]
+	},
 ]
 
 @onready var lista_items = $VBoxContainer/HBoxContainer/ScrollContainer/VBoxContainer
@@ -88,18 +298,40 @@ func actualizar_lista_crafting():
 
 @onready var res_icono = $VBoxContainer/HBoxContainer/SeccionIzquierda/Resultado/TextureRect/Item
 @onready var res_nombre = $VBoxContainer/HBoxContainer/SeccionIzquierda/Resultado/Label
+@onready var gridContainer = $VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer
 
 func _on_receta_seleccionada(data):
 	print("Seleccionado: ", data["name"])
 	
-	# Actualizamos el panel de la derecha
+	# 1. Actualizamos el panel de "Resultado" (el de la derecha)
 	res_nombre.text = data["name"]
 	res_icono.texture = obtener_icono_atlas(data["icon"])
 	
-	# Guardamos la receta seleccionada para saber qué fabricar luego
+	# 2. Guardamos la receta actual
 	receta_actual = data
 	
-	# Aquí podrías llamar a una función para mostrar los materiales en el GridContainer
-	# actualizar_materiales_necesarios(data["price"])
+	# 3. Dibujamos la receta en el GridContainer
+	actualizar_grid_receta(data["recipe"])
+
+func actualizar_grid_receta(receta_array: Array):
+	var slots = gridContainer.get_children()
+	
+	# Recorremos todos los slots del GridContainer (los 9 cuadros)
+	for i in range(slots.size()):
+		var actualSlot = slots[i]
+		var item_rect = actualSlot.get_node_or_null("Item") # Buscamos el TextureRect "Item"
+		
+		if not item_rect: continue # Si el slot no tiene el nodo "Item", saltamos
+		
+		# Verificamos si la receta tiene algo en esta posición (i)
+		# y si no nos hemos pasado del tamaño del array de la receta
+		if i < receta_array.size() and receta_array[i] != null:
+			var material_data = receta_array[i]
+			# Usamos tu función de atlas con el "vector" guardado en la receta
+			item_rect.texture = obtener_icono_atlas(material_data["vector"])
+			item_rect.visible = true
+		else:
+			# Si la posición es null o la receta es más corta, limpiamos el slot
+			item_rect.texture = null
 
 var receta_actual = null

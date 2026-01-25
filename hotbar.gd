@@ -76,18 +76,23 @@ func recolect(item_id):
 			
 	return false # Inventario totalmente lleno
 
+const COORDS_SLOT_NORMAL = Vector2i(1, 6)
+const SPRITE_SHEET = preload("res://uisprites.png")
+const TILE_SIZE_UI = 64 # El tamaño de tus slots en el atlas
+
+func get_slot_texture(coords: Vector2i) -> AtlasTexture:
+	var atlas = AtlasTexture.new()
+	atlas.atlas = SPRITE_SHEET
+	atlas.region = Rect2(coords.x * TILE_SIZE_UI, coords.y * TILE_SIZE_UI, TILE_SIZE_UI, TILE_SIZE_UI)
+	return atlas
+
 func actualizar_interfaz_hotbar():
 	for i in range(dataslots.size()):
-		# Obtenemos el nodo visual del slot (el Panel/TextureRect que ya tienes)
 		var s = slots[i]
 		var data = dataslots[i]
-		
-		# Buscamos si ya existe un icono dentro del slot
 		var icono = s.get_node_or_null("ItemIcon")
 		var label = s.get_node_or_null("AmountLabel")
-		
 		if data["item"] != null:
-			# Si no existe el nodo del icono, lo creamos dinámicamente
 			if icono == null:
 				icono = TextureRect.new()
 				icono.name = "ItemIcon"
@@ -100,6 +105,7 @@ func actualizar_interfaz_hotbar():
 				var font = load("res://Monocraft-ttf/Monocraft.ttf")
 				label = Label.new()
 				label.name = "AmountLabel"
+				
 				label.add_theme_font_override("font", font)
 				label.add_theme_font_size_override("font_size", 16)
 				label.add_theme_constant_override("outline_size", 3)
@@ -107,15 +113,30 @@ func actualizar_interfaz_hotbar():
 				label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 				label.position.x -= 4
 				s.add_child(label)
-			
-			# Asignamos la textura del bloque (item_id debe ser una Texture)
-			icono.texture = data["item"]
-			icono.show()
+				icono.texture = data["item"]
+				icono.show()
+
 			label.text = str(data["amount"])
 			label.show()
 		else:
-			# Si el slot está vacío y existe el nodo, lo ocultamos
 			if icono != null:
 				icono.hide()
 			if label != null:
 				label.hide()
+
+func unlock_next_slot() -> int:
+	for i in range(dataslots.size()):
+		if dataslots[i]["locked"] == true:
+			dataslots[i]["locked"] = false
+			# Quitamos la llamada a actualizar_interfaz_hotbar() de aquí
+			return i 
+	return -1
+
+func unlock_by_day(day: int):
+	# Cada 2 días intentamos desbloquear
+	if (day % 2 == 0):
+		var index = unlock_next_slot()
+		if index >= 0 and index < slots.size():
+			var slot_node = slots[index]
+			#slot_node.texture = get_slot_texture(COORDS_SLOT_NORMAL)
+			print("Slot visual modificado: ", index)
