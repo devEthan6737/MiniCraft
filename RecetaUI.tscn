@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3 uid="uid://cl4byulba5o1u"]
+
+[ext_resource type="FontFile" uid="uid://dn0lu4a6c01rq" path="res://Monocraft-ttf/Monocraft.ttf" id="1_arl43"]
+[ext_resource type="Texture2D" uid="uid://ctvlxeiq7m0ap" path="res://sprites001.png" id="1_i4fmx"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_svn8l"]
+font = ExtResource("1_arl43")
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_arl43"]
+atlas = ExtResource("1_i4fmx")
+
+[node name="RecetaUi" type="Button"]
+custom_minimum_size = Vector2(150, 50)
+offset_right = 150.0
+offset_bottom = 50.0
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 91.0
+offset_bottom = 33.0
+label_settings = SubResource("LabelSettings_svn8l")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+texture_filter = 1
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 0
+offset_left = 94.0
+offset_top = 5.0
+offset_right = 134.0
+offset_bottom = 45.0
+texture = SubResource("AtlasTexture_arl43")
+expand_mode = 1
+stretch_mode = 5

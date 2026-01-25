@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://d1l6ht3cpa2i2"]
+[gd_scene load_steps=43 format=3 uid="uid://d1l6ht3cpa2i2"]
 
 [ext_resource type="Script" uid="uid://cdgq28a614bhf" path="res://world.gd" id="1_aqk2v"]
 [ext_resource type="Texture2D" uid="uid://ctvlxeiq7m0ap" path="res://sprites001.png" id="1_tlwt5"]
@@ -116,6 +116,7 @@ texture = ExtResource("1_tlwt5")
 4:1/0/custom_data_0 = "tree"
 4:1/0/custom_data_1 = 3
 5:5/0 = 0
+7:4/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_pkg7o"]
 physics_layer_0/collision_layer = 1
@@ -298,6 +299,8 @@ region = Rect2(16, 96, 16, 16)
 atlas = ExtResource("7_ioo17")
 region = Rect2(16, 96, 16, 16)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_udxuc"]
+
 [sub_resource type="LabelSettings" id="LabelSettings_2u3nc"]
 font = ExtResource("7_gbfbk")
 font_size = 20
@@ -357,7 +360,7 @@ libraries = {
 [node name="DayNightTimer" type="CanvasModulate" parent="."]
 
 [node name="Timer" type="Timer" parent="DayNightTimer"]
-wait_time = 5.0
+wait_time = 60.0
 one_shot = true
 autostart = true
 
@@ -510,7 +513,6 @@ stretch_mode = 5
 
 [node name="CraftingMenu" type="Panel" parent="CanvasLayer/HUD"]
 process_mode = 3
-visible = false
 clip_contents = true
 custom_minimum_size = Vector2(600, 400)
 layout_mode = 1
@@ -567,11 +569,25 @@ layout_mode = 2
 texture = SubResource("AtlasTexture_70uel")
 stretch_mode = 5
 
+[node name="Item" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer/Slot1"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 13.0
+offset_right = 51.0
+offset_bottom = 51.0
+
 [node name="Slot2" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 texture = SubResource("AtlasTexture_70uel")
 stretch_mode = 5
+
+[node name="Item" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer/Slot2"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 13.0
+offset_right = 51.0
+offset_bottom = 51.0
 
 [node name="Slot3" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer"]
 custom_minimum_size = Vector2(64, 64)
@@ -579,11 +595,25 @@ layout_mode = 2
 texture = SubResource("AtlasTexture_70uel")
 stretch_mode = 5
 
+[node name="Item" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer/Slot3"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 13.0
+offset_right = 51.0
+offset_bottom = 51.0
+
 [node name="Slot4" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 texture = SubResource("AtlasTexture_70uel")
 stretch_mode = 5
+
+[node name="Item" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer/Slot4"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 13.0
+offset_right = 51.0
+offset_bottom = 51.0
 
 [node name="Slot5" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer"]
 custom_minimum_size = Vector2(64, 64)
@@ -591,11 +621,25 @@ layout_mode = 2
 texture = SubResource("AtlasTexture_70uel")
 stretch_mode = 5
 
+[node name="Item" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer/Slot5"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 13.0
+offset_right = 51.0
+offset_bottom = 51.0
+
 [node name="Slot6" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 texture = SubResource("AtlasTexture_70uel")
 stretch_mode = 5
+
+[node name="Item" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer/Slot6"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 13.0
+offset_right = 51.0
+offset_bottom = 51.0
 
 [node name="Slot7" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer"]
 custom_minimum_size = Vector2(64, 64)
@@ -603,17 +647,38 @@ layout_mode = 2
 texture = SubResource("AtlasTexture_70uel")
 stretch_mode = 5
 
+[node name="Item" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer/Slot7"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 13.0
+offset_right = 51.0
+offset_bottom = 51.0
+
 [node name="Slot8" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 texture = SubResource("AtlasTexture_70uel")
 stretch_mode = 5
 
+[node name="Item" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer/Slot8"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 13.0
+offset_right = 51.0
+offset_bottom = 51.0
+
 [node name="Slot9" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer"]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 texture = SubResource("AtlasTexture_70uel")
 stretch_mode = 5
+
+[node name="Item" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer/Slot9"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 13.0
+offset_right = 51.0
+offset_bottom = 51.0
 
 [node name="Resultado" type="VBoxContainer" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda"]
 layout_mode = 1
@@ -634,6 +699,14 @@ size_flags_vertical = 4
 texture = SubResource("AtlasTexture_hiqwa")
 stretch_mode = 5
 
+[node name="Item" type="TextureRect" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/Resultado/TextureRect"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 13.0
+offset_right = 51.0
+offset_bottom = 51.0
+texture = SubResource("AtlasTexture_udxuc")
+
 [node name="Label" type="Label" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/SeccionIzquierda/Resultado"]
 layout_mode = 2
 size_flags_horizontal = 4
@@ -645,14 +718,13 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/ScrollContainer"]
+custom_minimum_size = Vector2(175, 0)
 layout_mode = 2
-size_flags_horizontal = 3
 size_flags_vertical = 3
-
-[node name="Button" type="Button" parent="CanvasLayer/HUD/CraftingMenu/VBoxContainer/HBoxContainer/ScrollContainer/VBoxContainer"]
-layout_mode = 2
+theme_override_constants/separation = 6
 
 [node name="Cooldown" type="Label" parent="CanvasLayer/HUD"]
+texture_filter = 1
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -667,6 +739,7 @@ text = "05:00"
 label_settings = SubResource("LabelSettings_wse8f")
 
 [node name="Day" type="Label" parent="CanvasLayer/HUD"]
+texture_filter = 1
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -681,6 +754,7 @@ text = "Day 0"
 label_settings = SubResource("LabelSettings_ic0uy")
 
 [node name="Enemies" type="Label" parent="CanvasLayer/HUD"]
+texture_filter = 1
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -700,12 +774,17 @@ layer = -100
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = 13.0
+offset_right = 3.0
+offset_bottom = 13.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0.8901961, 1, 1)
 
 [node name="Cursor" type="Sprite2D" parent="."]
 z_index = 10
+texture_filter = 1
 texture = SubResource("AtlasTexture_wse8f")
 
 [node name="Preview" type="Sprite2D" parent="Cursor"]
