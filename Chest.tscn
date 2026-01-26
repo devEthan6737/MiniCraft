@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://crsbt0xf3xwnp"]
+
+[ext_resource type="Script" uid="uid://cd7odurj32k53" path="res://chest.gd" id="1_4gslm"]
+[ext_resource type="Texture2D" uid="uid://ctvlxeiq7m0ap" path="res://sprites001.png" id="2_5udua"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hkml5"]
+atlas = ExtResource("2_5udua")
+region = Rect2(48, 48, 16, 16)
+
+[node name="Chest" type="StaticBody2D"]
+script = ExtResource("1_4gslm")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_hkml5")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+
+[node name="KeyPrompt" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="Detector" type="Area2D" parent="."]

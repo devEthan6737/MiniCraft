@@ -5,10 +5,6 @@ extends Control
 func _ready() -> void:
 	button.pressed.connect(_on_button_craft_pressed_general)
 
-func _input(event):
-	if event.is_action_pressed("ui_crafting") or (event is InputEventKey and event.keycode == KEY_E and event.pressed):
-		toggle_menu()
-
 func toggle_menu():
 	visible = !visible
 	var player = get_tree().get_first_node_in_group("player")

@@ -392,7 +392,7 @@ libraries = {
 [node name="DayNightTimer" type="CanvasModulate" parent="."]
 
 [node name="Timer" type="Timer" parent="DayNightTimer"]
-wait_time = 5.0
+wait_time = 300.0
 one_shot = true
 autostart = true
 

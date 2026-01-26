@@ -64,8 +64,10 @@ func actualizar_animaciones(direction):
 
 @export var range_minado = 40 # Distancia máxima en píxeles
 @onready var terrain = get_node("../Terrain") # "../" sube al padre (World) y busca "Terrain"
+@onready var craftmenu = get_node("../CanvasLayer/HUD/CraftingMenu")
 var tiempo_actual_minado = 0.0
 var bloque_actual_siendo_picado = Vector2i(-1, -1)
+var near_chest = null
 
 func _input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
@@ -74,6 +76,11 @@ func _input(event):
 		resetear_minado()
 	if event is InputEventKey and event.keycode == KEY_Q and event.pressed:
 		soltar_item_desde_hotbar()
+	if event.is_action_pressed("ui_interact") or (event is InputEventKey and event.keycode == KEY_E and event.pressed): # La tecla E
+		if near_chest != null:
+			near_chest.interact()
+		else:
+			craftmenu.toggle_menu()
 
 func atacar_o_minar():
 	# 1. Detección física en el punto del selector (Capa 2: Enemigos)
@@ -322,7 +329,11 @@ func place():
 			# Colocamos el bloque en el TileMap
 			# Usamos los datos guardados en el AtlasTexture del slot
 			var atlas_coords = Vector2i(slot["atlas"].region.position / 16.0)
-			terrain.set_cell(pos_mapa, 1, atlas_coords)
+			
+			if slot["item"] == "chest":
+				spawn_chest_object(pos_mapa)
+			else:
+				terrain.set_cell(pos_mapa, 1, atlas_coords)
 			
 			# 4. Restar cantidad
 			slot["amount"] -= 1
@@ -383,3 +394,9 @@ func recibir_daño(cantidad):
 func morir():
 	# Puedes cambiar esto por una animación de muerte o pantalla de Game Over
 	get_tree().reload_current_scene()
+
+@onready var chest_scene = preload("res://Chest.tscn")
+func spawn_chest_object(map_pos):
+	var new_chest = chest_scene.instantiate()
+	new_chest.global_position = terrain.map_to_local(map_pos)
+	get_parent().add_child(new_chest)
