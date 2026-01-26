@@ -1,0 +1,117 @@
+[gd_scene load_steps=6 format=3 uid="uid://cgeqrc7i5tcrb"]
+
+[ext_resource type="Texture2D" uid="uid://ctvlxeiq7m0ap" path="res://sprites001.png" id="1_v4kwd"]
+
+[sub_resource type="GDScript" id="GDScript_4gslm"]
+script/source = "extends Area2D
+
+var items = [] # 0: Entrada, 1: Carbón, 2: Resultado
+var tiempo_fundido = 0.0
+
+# Cargamos la imagen de los sprites
+var sprite_sheet = preload(\"res://sprites001.png\")
+
+func _ready():
+	for i in range(3):
+		items.append({\"item\": null, \"amount\": 0, \"atlas\": null})
+	
+	self.body_entered.connect(_on_detector_body_entered)
+	self.body_exited.connect(_on_detector_body_exited)
+	
+	if has_node(\"KeyPrompt\"):
+		$KeyPrompt.hide()
+
+func _process(delta):
+	# Condición: Hay algo en entrada y hay carbón en el slot de combustible
+	if items[0][\"item\"] != null and items[1][\"item\"] == \"coal\":
+		procesar_fundicion(delta)
+	else:
+		tiempo_fundido = 0.0
+
+func procesar_fundicion(delta):
+	tiempo_fundido += delta
+	if tiempo_fundido >= 3.0:
+		cocinar_item()
+		tiempo_fundido = 0.0
+
+func cocinar_item():
+	# Receta: entrada -> coordenadas_atlas_resultado
+	var recetas = {
+		\"iron\": Vector2i(4, 5), # Hierro fundido
+		\"gold\": Vector2i(3, 5)  # Oro fundido
+	}
+	
+	var entrada = items[0][\"item\"]
+	
+	if recetas.has(entrada):
+		# 1. Comprobar si el slot de resultado está vacío o tiene el mismo item
+		if items[2][\"item\"] == null or items[2][\"item\"] == entrada:
+			
+			# Reducir materiales
+			items[0][\"amount\"] -= 1
+			items[1][\"amount\"] -= 1
+			
+			# Crear el AtlasTexture para el lingote
+			var nuevo_atlas = AtlasTexture.new()
+			nuevo_atlas.atlas = sprite_sheet
+			nuevo_atlas.region = Rect2(recetas[entrada].x * 16, recetas[entrada].y * 16, 16, 16)
+			
+			# Guardar en el slot de resultado (Slot 2)
+			items[2][\"item\"] = entrada
+			items[2][\"amount\"] += 1
+			items[2][\"atlas\"] = nuevo_atlas # ¡Esto quita la invisibilidad!
+			
+			# Limpiar entrada/carbón si se agotan
+			if items[0][\"amount\"] <= 0: items[0] = {\"item\": null, \"amount\": 0, \"atlas\": null}
+			if items[1][\"amount\"] <= 0: items[1] = {\"item\": null, \"amount\": 0, \"atlas\": null}
+			
+			# Actualizar la UI si está abierta
+			var ui = get_tree().get_first_node_in_group(\"FurnaceUI\")
+			if ui and ui.visible:
+				ui.update_slots()
+
+# --- Funciones de interacción y señales iguales a las tuyas ---
+func interact():
+	var ui = get_tree().get_first_node_in_group(\"FurnaceUI\")
+	if ui: ui.open_furnace(self)
+
+func _on_detector_body_entered(body):
+	if body.is_in_group(\"Player\"):
+		body.near_chest = self
+		if has_node(\"KeyPrompt\"): $KeyPrompt.show()
+
+func _on_detector_body_exited(body):
+	if body.is_in_group(\"Player\"):
+		body.near_chest = null
+		if has_node(\"KeyPrompt\"): $KeyPrompt.hide()
+"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hkml5"]
+atlas = ExtResource("1_v4kwd")
+region = Rect2(16, 32, 16, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5udua"]
+size = Vector2(14, 15)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_5udua"]
+radius = 21.0
+
+[node name="Furnace" type="Area2D"]
+script = SubResource("GDScript_4gslm")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+texture = SubResource("AtlasTexture_hkml5")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 0.5)
+shape = SubResource("RectangleShape2D_5udua")
+
+[node name="KeyPrompt" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="Detector" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Detector"]
+shape = SubResource("CircleShape2D_5udua")

@@ -47,7 +47,7 @@ func space_remaining() -> int:
 func select(index):
 	var max_index = 0;
 	for x in range(dataslots.size()):
-		if !dataslots[x]["locked"]:
+		if !dataslots[x].get("locked", false):
 			max_index += 1
 	
 	if index >= max_index:

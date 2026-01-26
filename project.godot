@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 Hotbar=""
 Player=""
 ChestUI=""
+FurnaceUI=""
 
 [input]
 

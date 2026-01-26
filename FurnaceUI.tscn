@@ -1,0 +1,129 @@
+[gd_scene load_steps=8 format=3 uid="uid://datgeqioh3igm"]
+
+[ext_resource type="Script" uid="uid://dgwa3rmtp5qgl" path="res://furnace_ui.gd" id="1_8cfji"]
+[ext_resource type="Texture2D" uid="uid://xh1iyxpxpce8" path="res://uisprites.png" id="2_3a61j"]
+[ext_resource type="FontFile" uid="uid://dn0lu4a6c01rq" path="res://Monocraft-ttf/Monocraft.ttf" id="3_8xnlb"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tdips"]
+atlas = ExtResource("2_3a61j")
+region = Rect2(16, 96, 16, 16)
+
+[sub_resource type="LabelSettings" id="LabelSettings_s6pcm"]
+font = ExtResource("3_8xnlb")
+
+[sub_resource type="LabelSettings" id="LabelSettings_hhpj7"]
+font = ExtResource("3_8xnlb")
+
+[sub_resource type="LabelSettings" id="LabelSettings_7hj3c"]
+font = ExtResource("3_8xnlb")
+
+[node name="FurnaceInventory" type="Control" groups=["FurnaceUI"]]
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 1
+script = ExtResource("1_8cfji")
+
+[node name="Panel" type="Panel" parent="."]
+texture_filter = 1
+custom_minimum_size = Vector2(140, 140)
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 1
+
+[node name="GridContainer" type="GridContainer" parent="Panel"]
+custom_minimum_size = Vector2(128, 128)
+layout_mode = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 136.0
+offset_bottom = 136.0
+columns = 2
+
+[node name="Slot1" type="TextureRect" parent="Panel/GridContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = SubResource("AtlasTexture_tdips")
+
+[node name="Item" type="TextureRect" parent="Panel/GridContainer/Slot1"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 13.0
+offset_right = 51.0
+offset_bottom = 51.0
+mouse_filter = 2
+
+[node name="Button" type="Button" parent="Panel/GridContainer/Slot1"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 55.0
+offset_bottom = 56.0
+
+[node name="Label" type="Label" parent="Panel/GridContainer/Slot1"]
+layout_mode = 0
+offset_top = 41.0
+offset_right = 64.0
+offset_bottom = 64.0
+label_settings = SubResource("LabelSettings_s6pcm")
+horizontal_alignment = 1
+
+[node name="Slot2" type="TextureRect" parent="Panel/GridContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_vertical = 4
+texture = SubResource("AtlasTexture_tdips")
+
+[node name="Item" type="TextureRect" parent="Panel/GridContainer/Slot2"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 13.0
+offset_right = 51.0
+offset_bottom = 51.0
+mouse_filter = 2
+
+[node name="Button" type="Button" parent="Panel/GridContainer/Slot2"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 56.0
+offset_bottom = 56.0
+
+[node name="Label" type="Label" parent="Panel/GridContainer/Slot2"]
+layout_mode = 0
+offset_top = 41.0
+offset_right = 64.0
+offset_bottom = 64.0
+label_settings = SubResource("LabelSettings_hhpj7")
+horizontal_alignment = 1
+
+[node name="Slot3" type="TextureRect" parent="Panel/GridContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = SubResource("AtlasTexture_tdips")
+
+[node name="Item" type="TextureRect" parent="Panel/GridContainer/Slot3"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 13.0
+offset_right = 51.0
+offset_bottom = 51.0
+mouse_filter = 2
+
+[node name="Button" type="Button" parent="Panel/GridContainer/Slot3"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 56.0
+offset_bottom = 56.0
+
+[node name="Label" type="Label" parent="Panel/GridContainer/Slot3"]
+layout_mode = 0
+offset_top = 41.0
+offset_right = 64.0
+offset_bottom = 64.0
+label_settings = SubResource("LabelSettings_7hj3c")
+horizontal_alignment = 1

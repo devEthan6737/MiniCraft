@@ -351,8 +351,8 @@ func place():
 			# Usamos los datos guardados en el AtlasTexture del slot
 			var atlas_coords = Vector2i(slot["atlas"].region.position / 16.0)
 			
-			if slot["item"] == "chest":
-				spawn_chest_object(pos_mapa)
+			if slot["item"] == "chest" || slot["item"] == "furnace":
+				spawn_chest_object(pos_mapa, slot["item"])
 			else:
 				terrain.set_cell(pos_mapa, 1, atlas_coords)
 			
@@ -417,7 +417,8 @@ func morir():
 	get_tree().reload_current_scene()
 
 @onready var chest_scene = preload("res://Chest.tscn")
-func spawn_chest_object(map_pos):
-	var new_chest = chest_scene.instantiate()
+@onready var furnace_scene = preload("res://Furnace.tscn")
+func spawn_chest_object(map_pos, type):
+	var new_chest = chest_scene.instantiate() if type == "chest" else furnace_scene.instantiate()
 	new_chest.global_position = terrain.map_to_local(map_pos)
 	get_parent().add_child(new_chest)
