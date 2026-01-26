@@ -135,13 +135,21 @@ func revisar_contacto_jugador():
 func atacar(objetivo):
 	can_attack = false
 	
-	# Aplicamos el daño al jugador
+	# 1. Aplicamos el daño al jugador
 	if objetivo.has_method("recibir_daño"):
 		objetivo.recibir_daño(damage)
 	
-	# Esperamos el cooldown antes de poder atacar de nuevo
+	# 2. SEGURIDAD: Si el jugador ha muerto y la escena se está recargando, 
+	# el enemigo ya no estará en el árbol. Salimos de la función para evitar el crash.
+	if not is_inside_tree():
+		return
+
+	# 3. Esperamos el cooldown
 	await get_tree().create_timer(attack_cooldown).timeout
-	can_attack = true
+	
+	# 4. Volvemos a comprobar después del tiempo por si el nivel cambió mientras esperábamos
+	if is_inside_tree():
+		can_attack = true
 
 func actualizar_animaciones():
 	if anim.current_animation == "attack" or anim.current_animation == "transition":

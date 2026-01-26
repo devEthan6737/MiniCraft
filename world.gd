@@ -370,6 +370,10 @@ func amanecer_rapido():
 	es_de_noche = false
 	enemies_label.text = ""
 	day += 1
+	
+	if day >= 11:
+		player.morir()
+
 	spawnable_enemies_amount = spawnable_enemies_amount + day
 	var tween = create_tween()
 	# Vuelve al azul claro rápido (en 1 segundo)
