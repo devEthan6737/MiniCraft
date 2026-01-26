@@ -1,40 +1,36 @@
 extends CharacterBody2D
 
+# global vars
 var SPEED = 50.0 
-var vida = 100
+var life = 100
 var JUMP_VELOCITY = -300.0
 var damage = 1
 var can_attack = 1
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
-var empuje_actual = Vector2.ZERO
-var friccion_empuje = 800.0
+var push = Vector2.ZERO
+var push_friction = 800.0
 
 @onready var attack_cooldown = 1.0
 @onready var player = get_tree().get_first_node_in_group("Player")
 @onready var anim = $AnimationPlayer
 @onready var sprite = $Sprite2D
-@onready var detector_pared = $RayCast2D # Referencia al nuevo nodo
+@onready var detector_pared = $RayCast2D
 
+# AI movility
 func _physics_process(delta):
-	# 1. Aplicar gravedad siempre
 	if not is_on_floor():
 		velocity.y += gravity * delta
 		
-	# 2. LÓGICA DE EMPUJE (Knockback)
-	# Si el empuje es mayor a 10, el zombie pierde el control y sale volando
-	if empuje_actual.length() > 10:
-		velocity.x = empuje_actual.x
-		# La fricción va frenando el empuje poco a poco
-		empuje_actual = empuje_actual.move_toward(Vector2.ZERO, friccion_empuje * delta)
+	if push.length() > 10:
+		velocity.x = push.x
+		push = push.move_toward(Vector2.ZERO, push_friction * delta)
 	
-	# 3. LÓGICA DE MOVIMIENTO (IA)
-	# Solo se ejecuta si NO está siendo empujado con fuerza
 	elif player:
 		var diff_x = player.global_position.x - global_position.x
 		var direccion_x = sign(diff_x)
-		var margen_parada = 40.0
+		var margin_stop = 40.0
 		
-		if abs(diff_x) > margen_parada:
+		if abs(diff_x) > margin_stop:
 			velocity.x = direccion_x * SPEED
 		else:
 			velocity.x = move_toward(velocity.x, 0, SPEED)
@@ -42,7 +38,6 @@ func _physics_process(delta):
 		if direccion_x != 0:
 			sprite.flip_h = direccion_x < 0
 		
-		# Salto por pared o por posición del jugador
 		detector_pared.target_position.x = direccion_x * 25
 		if is_on_floor():
 			var dist = abs(diff_x)
@@ -54,33 +49,30 @@ func _physics_process(delta):
 				anim.play("jump")
 	else:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
-
-	# 4. Mover al personaje
-	move_and_slide()
 	
-	actualizar_animaciones()
+	move_and_slide()
+	update_animations()
 	
 	if player and can_attack:
-		revisar_contacto_jugador()
+		check_player_contact()
 
-func recibir_daño(cantidad, vector_empuje = Vector2.ZERO):
-	vida -= cantidad
-	
-	# Aplicamos el empuje
-	empuje_actual = vector_empuje
-	# Un pequeño salto extra hacia arriba hace que el empuje quede más "profesional"
+# this function modify the enemy's life
+func take_damage(amount, push_vector = Vector2.ZERO):
+	life -= amount
+	push = push_vector
+
 	if is_on_floor():
 		velocity.y = -100 
 	
-	# Efecto visual
 	var tween = create_tween()
 	tween.tween_property(sprite, "modulate", Color.RED, 0.1)
 	tween.tween_property(sprite, "modulate", Color.WHITE, 0.1)
 	
-	if vida <= 0:
-		morir()
+	if life <= 0:
+		die()
 
-func morir():
+# this function deletes the enemy and drops items
+func die():
 	var rand = randf()
 	var item_position
 	var item = ""
@@ -100,17 +92,15 @@ func morir():
 	queue_free()
 
 @onready var scene = preload("res://DroppedItem.tscn")
+
+# here i spawn new items
 func spawn_dropped_item(pos_global, atlas_coords, _source_id, item_name):
 	var new_item = scene.instantiate()
 	get_parent().add_child(new_item)
 	
 	new_item.global_position = pos_global
+	new_item.setting(atlas_coords, 1, item_name)
 	
-	# Usamos la función configurar que ya teníamos
-	# El tercer parámetro es el nombre que usará el crafteo ("health_potion")
-	new_item.configurar(atlas_coords, 1, item_name)
-	
-	# Opcional: Un pequeño salto físico para que se vea que "cae" del enemigo
 	var tween = create_tween()
 	var jump = pos_global + Vector2(randf_range(-20, 20), -30)
 	var floor = jump + Vector2(0, 30)
@@ -118,61 +108,58 @@ func spawn_dropped_item(pos_global, atlas_coords, _source_id, item_name):
 	tween.tween_property(new_item, "global_position", jump, 0.2).set_trans(Tween.TRANS_QUAD)
 	tween.tween_property(new_item, "global_position", floor, 0.4).set_ease(Tween.EASE_OUT)
 
-func revisar_contacto_jugador():
-	# Obtenemos los cuerpos que están dentro del Area2D del enemigo
-	var cuerpos = $AreaAtaque.get_overlapping_bodies()
+# checks if the player is in contact with the enemy
+func check_player_contact():
+	var bodies = $AreaAtaque.get_overlapping_bodies()
 	
-	for cuerpo in cuerpos:
-		if cuerpo.is_in_group("Player"):
+	for body in bodies:
+		if body.is_in_group("Player"):
 			if (anim.current_animation == "idle"):
 				anim.play("transition")
 				anim.queue("attack")
 			else:
 				anim.play("attack")
-			atacar(cuerpo)
+			attack(body)
 			break
 
-func atacar(objetivo):
+# this functions make possible the attack to the player
+func attack(target):
 	can_attack = false
 	
-	# 1. Aplicamos el daño al jugador
-	if objetivo.has_method("recibir_daño"):
-		objetivo.recibir_daño(damage)
+	if target.has_method("take_damage"):
+		target.take_damage(damage)
 	
-	# 2. SEGURIDAD: Si el jugador ha muerto y la escena se está recargando, 
-	# el enemigo ya no estará en el árbol. Salimos de la función para evitar el crash.
 	if not is_inside_tree():
 		return
 
-	# 3. Esperamos el cooldown
 	await get_tree().create_timer(attack_cooldown).timeout
 	
-	# 4. Volvemos a comprobar después del tiempo por si el nivel cambió mientras esperábamos
 	if is_inside_tree():
 		can_attack = true
 
-func actualizar_animaciones():
+# this updates animations
+func update_animations():
 	if anim.current_animation == "attack" or anim.current_animation == "transition":
 		return
 	
 	if not is_on_floor():
 		if anim.current_animation != "jump":
-			# Si venimos de estar quietos, pasamos por transición
-			lanzar_animacion_con_logica("jump")
+			launch_logic_animation("jump")
 	else:
 		if abs(velocity.x) > 1:
 			if anim.current_animation != "walk":
-				lanzar_animacion_con_logica("walk")
+				launch_logic_animation("walk")
 		else:
 			if anim.current_animation != "idle":
-				lanzar_animacion_con_logica("idle")
+				launch_logic_animation("idle")
 
-func lanzar_animacion_con_logica(nombre_nueva_anim):
-	if anim.current_animation == "idle" and nombre_nueva_anim != "idle":
+# the same as the last but here y just select transitions between animations
+func launch_logic_animation(animation):
+	if anim.current_animation == "idle" and animation != "idle":
 		anim.play("transition")
-		anim.queue(nombre_nueva_anim)
-	elif ["attack", "jump", "walk"].has(anim.current_animation) and nombre_nueva_anim == "idle":
+		anim.queue(animation)
+	elif ["attack", "jump", "walk"].has(anim.current_animation) and animation == "idle":
 		anim.play("transition")
 		anim.queue("idle")
 	else:
-		anim.play(nombre_nueva_anim)
+		anim.play(animation)

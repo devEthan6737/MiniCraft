@@ -1,58 +1,67 @@
 extends HBoxContainer
 
-var tex_lleno = preload("res://FullHeart.tres")
-var tex_medio = preload("res://SlicedHeart.tres")
-
+var fullheart = preload("res://FullHeart.tres")
+var midheart = preload("res://SlicedHeart.tres")
 var maxlife = 20
 var life = 20
 
+# on ready we update the UI
 func _ready():
 	for c in get_children():
 		c.pivot_offset = c.size / 2
 	update_ui()
 
+# updating UI
+# this bar of life detects middle hearts
+# even numbers are full hearts
+# odd numbers are mid hearts
 func update_ui():
-	var corazones = get_children()
-	for i in range(corazones.size()):
-		var slot_corazon = corazones[i]
-		var valor_corazon_lleno = (i + 1) * 2
+	var hearts = get_children()
+	for i in range(hearts.size()):
+		var heart_slot = hearts[i]
+		var full_heart_value = (i + 1) * 2
 		
-		if life >= valor_corazon_lleno:
-			slot_corazon.visible = true
-			slot_corazon.texture = tex_lleno
-			slot_corazon.modulate = Color(1, 1, 1)
-		elif life == valor_corazon_lleno - 1:
-			slot_corazon.visible = true
-			slot_corazon.texture = tex_medio
-			slot_corazon.modulate = Color(1, 1, 1)
+		if life >= full_heart_value:
+			heart_slot.visible = true
+			heart_slot.texture = fullheart
+			heart_slot.modulate = Color(1, 1, 1)
+		elif life == full_heart_value - 1:
+			heart_slot.visible = true
+			heart_slot.texture = midheart
+			heart_slot.modulate = Color(1, 1, 1)
 		else:
-			slot_corazon.visible = false
+			heart_slot.visible = false
 
-func recibir_danio(cantidad):
-	var vida_anterior = life
+# take damage
+func take_damage(cantidad):
+	var last_life = life
 	life = clamp(life - cantidad, 0, maxlife)
 	update_ui()
 	
-	if life < vida_anterior:
+	if life < last_life:
 		if int(life) % 2 == 0:
-			temblar_toda_la_barra()
+			shake_bar()
 		else:
-			var indice_corazon = int(ceil(life / 2.0)) - 1
-			temblar_corazon(indice_corazon)
+			var heart_index = int(ceil(life / 2.0)) - 1
+			shake_heart(heart_index)
 
-func temblar_corazon(indice):
-	var corazones = get_children()
-	if indice >= 0 and indice < corazones.size():
-		var c = corazones[indice]
+# this function is for UI
+# this shakes the mid heart a little
+func shake_heart(indice):
+	var hearts = get_children()
+	if indice >= 0 and indice < hearts.size():
+		var heart = hearts[indice]
 		var tween = create_tween()
-
-		for i in range(3):
-			tween.tween_property(c, "position:x", 2, 0.05).as_relative()
-			tween.tween_property(c, "position:x", -2, 0.05).as_relative()
 		
-		tween.tween_callback(func(): c.position.x)
+		for i in range(3):
+			tween.tween_property(heart, "position:x", 2, 0.05).as_relative()
+			tween.tween_property(heart, "position:x", -2, 0.05).as_relative()
+		
+		tween.tween_callback(func(): heart.position.x)
 
-func temblar_toda_la_barra():
+# this function is for UI
+# this shakes the bar a little
+func shake_bar():
 	var tween = create_tween()
 	var pos_y_original = position.y
 	

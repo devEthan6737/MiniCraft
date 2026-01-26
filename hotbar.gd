@@ -15,11 +15,13 @@ var dataslots = [
 	{ "item": null, "atlas": null, "locked": true, "amount": 0 }
 ]
 
+# when is ready, i get children slots & update the selection
 func _ready():
 	slots = get_children()
 	update_selection()
 	update_hotbar_ui()
 
+# detecting mouse or numbers
 func _input(event):
 	if event is InputEventKey and event.pressed:
 		if event.keycode >= KEY_1 and event.keycode <= KEY_9:
@@ -32,10 +34,12 @@ func _input(event):
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
 			change_slot(1)
 
+# swaping between slots
 func change_slot(direction):
 	var _new = wrapi(selected_slot + direction, 0, slots.size())
 	select(_new)
 
+# this calculates the space remaining of the hotbar
 func space_remaining() -> int:
 	var index = 0;
 	for x in range(dataslots.size()):
@@ -44,6 +48,7 @@ func space_remaining() -> int:
 	
 	return index
 
+# selects an slot
 func select(index):
 	var max_index = 0;
 	for x in range(dataslots.size()):
@@ -56,6 +61,7 @@ func select(index):
 	selected_slot = index
 	update_selection()
 
+# this updates the UI
 func update_selection():
 	for i in range(slots.size()):
 		var s = slots[i]
@@ -69,18 +75,18 @@ func update_selection():
 			s.scale = Vector2(1.0, 1.0)
 			s.z_index = 0
 
+# this function push new items or increase the amount of items in the hotbar
 func recolect(atlas_id, item_id):
-	# Buscar si ya existe el ítem Y tiene espacio para más
+	# finding items
 	for i in range(dataslots.size()):
 		var slot = dataslots[i]
-		# Comprobamos: que no esté bloqueado, que tenga el mismo ítem y que no haya llegado a 67
 		if not slot["locked"] and slot["atlas"] != null:
 			if slot["atlas"].region == atlas_id.region and slot["amount"] < 67:
 				slot["amount"] += 1
 				update_hotbar_ui()
 				return true
-
-	# Si no se pudo sumar a ningún slot existente, buscar uno vacío
+	
+	# incresing amount
 	for i in range(dataslots.size()):
 		if not dataslots[i]["locked"] and dataslots[i]["atlas"] == null:
 			dataslots[i]["item"] = item_id
@@ -89,18 +95,20 @@ func recolect(atlas_id, item_id):
 			update_hotbar_ui()
 			return true
 			
-	return false # Inventario totalmente lleno
+	return false # inventory full
 
 const COORDS_SLOT_NORMAL = Vector2i(1, 6)
 const SPRITE_SHEET = preload("res://uisprites.png")
-const TILE_SIZE_UI = 16 # El tamaño de tus slots en el atlas
+const TILE_SIZE_UI = 16
 
+# this returns an AtlasTexture from a Vector2
 func get_slot_texture(coords: Vector2i) -> AtlasTexture:
 	var atlas = AtlasTexture.new()
 	atlas.atlas = SPRITE_SHEET
 	atlas.region = Rect2(coords.x * TILE_SIZE_UI, coords.y * TILE_SIZE_UI, TILE_SIZE_UI, TILE_SIZE_UI)
 	return atlas
 
+# updateing the hotbar UI
 func update_hotbar_ui():
 	for i in range(dataslots.size()):
 		var s = slots[i]
@@ -143,6 +151,7 @@ func update_hotbar_ui():
 			if label != null:
 				label.hide()
 
+# unlock next locked slot of the hotbar
 func unlock_next_slot() -> int:
 	for i in range(dataslots.size()):
 		if dataslots[i]["locked"] == true:
@@ -151,11 +160,10 @@ func unlock_next_slot() -> int:
 			return i 
 	return -1
 
+# unlock slots each two days
 func unlock_by_day(day: int):
-	# Cada 2 días intentamos desbloquear
 	if (day % 2 == 0):
 		var index = unlock_next_slot()
 		if index >= 0 and index < slots.size():
-			var slot_node = slots[index]
-			print("Slot visual modificado: ", index)
+			print("Slot unlocked: ", index)
 			update_hotbar_ui()

@@ -2,9 +2,11 @@ extends Control
 
 @onready var button = $VBoxContainer/HBoxContainer/SeccionIzquierda/Result/TextureRect/Item/Button
 
+# this connects the button when is already
 func _ready() -> void:
 	button.pressed.connect(_on_button_craft_pressed_general)
 
+# toggling the UI menu
 func toggle_menu():
 	visible = !visible
 	var player = get_tree().get_first_node_in_group("player")
@@ -13,14 +15,16 @@ func toggle_menu():
 		if player: player.menu_open = true
 		
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		actualizar_lista_crafting()
+		update_crafting_list()
 	else:
 		if player: player.menu_open = false
-		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN # Opcional
+		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 
 const SPRITE_SHEET = preload("res://sprites001.png")
 const TILE_SIZE = 16
-var recetas = [
+
+# now, recipes :)
+var recipes = [
 	{
 		"name": "Chest",
 		"id": "chest",
@@ -34,7 +38,7 @@ var recetas = [
 				"id": "wood",
 				"vector": Vector2i(7, 4),
 			},
-			null,
+			null, # null means that the slot is empty
 			{
 				"id": "wood",
 				"vector": Vector2i(7, 4),
@@ -270,83 +274,74 @@ var recetas = [
 	},
 ]
 
-@onready var lista_items = $VBoxContainer/HBoxContainer/ScrollContainer/VBoxContainer
-@onready var receta_escena = preload("res://RecetaUI.tscn") # La escena que creaste en el paso 1
+@onready var list_items = $VBoxContainer/HBoxContainer/ScrollContainer/VBoxContainer
+@onready var recipe_scene = preload("res://RecetaUI.tscn")
 
-func obtener_icono_atlas(coords: Vector2i) -> AtlasTexture:
+# this creates an atlas sheet and gets the specific sprite
+func get_atlas_icon(coords: Vector2i) -> AtlasTexture:
 	var atlas = AtlasTexture.new()
-	atlas.atlas = SPRITE_SHEET # La imagen grande
-	# Definimos el cuadrado: Rect2(X, Y, Ancho, Alto)
+	atlas.atlas = SPRITE_SHEET
 	atlas.region = Rect2(coords.x * TILE_SIZE, coords.y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
 	return atlas
 
-func actualizar_lista_crafting():
-	# 1. Limpiamos
-	for hijo in lista_items.get_children():
-		hijo.queue_free()
+# hoping that this updates the list, idk
+func update_crafting_list():
+	for child in list_items.get_children():
+		child.queue_free()
 	
-	# 2. Creamos
-	for data in recetas:
-		var nueva_receta = receta_escena.instantiate()
+	for data in recipes:
+		var new_recipe = recipe_scene.instantiate()
 		
-		# IMPORTANTE: Primero lo añadimos al árbol para evitar problemas de jerarquía
-		lista_items.add_child(nueva_receta)
+		# i need to add it first
+		list_items.add_child(new_recipe)
 		
-		# Buscamos los nodos. Si fallan, revisa los nombres en tu escena RecetaUI
-		var label_nodo = nueva_receta.get_node_or_null("Label")
-		var tex_nodo = nueva_receta.get_node_or_null("TextureRect")
+		var node_label = new_recipe.get_node_or_null("Label")
+		var node_text = new_recipe.get_node_or_null("TextureRect")
 		
-		if label_nodo:
-			label_nodo.text = data["name"]
+		if node_label:
+			node_label.text = data["name"]
 		
-		if tex_nodo:
-			# ERROR CORREGIDO: data["icon"] es un Vector2i, necesitas la textura recortada
-			tex_nodo.texture = obtener_icono_atlas(data["icon"])
+		if node_text:
+			node_text.texture = get_atlas_icon(data["icon"])
 		
-		# Conectamos el click
-		nueva_receta.pressed.connect(_on_receta_seleccionada.bind(data))
+		new_recipe.pressed.connect(_on_selected_recipe.bind(data))
 
-@onready var res_icono = $VBoxContainer/HBoxContainer/SeccionIzquierda/Result/TextureRect/Item
-@onready var res_nombre = $VBoxContainer/HBoxContainer/SeccionIzquierda/Result/Label
+@onready var res_icon = $VBoxContainer/HBoxContainer/SeccionIzquierda/Result/TextureRect/Item
+@onready var res_name = $VBoxContainer/HBoxContainer/SeccionIzquierda/Result/Label
 @onready var gridContainer = $VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer
 
-func _on_receta_seleccionada(data):
-	print("Seleccionado: ", data["name"])
+# when the recipe is selected
+func _on_selected_recipe(data):
+	print("Selected: ", data["name"])
 	
-	# 1. Actualizamos el panel de "Resultado" (el de la derecha)
-	res_nombre.text = data["name"]
-	res_icono.texture = obtener_icono_atlas(data["icon"])
+	res_name.text = data["name"]
+	res_icon.texture = get_atlas_icon(data["icon"])
 	
-	# 2. Guardamos la receta actual
-	receta_actual = data
+	actual_recipe = data
 	
-	# 3. Dibujamos la receta en el GridContainer
-	actualizar_grid_receta(data["recipe"])
+	update_recipe_grid(data["recipe"])
 
-func actualizar_grid_receta(receta_array: Array):
+# this update the grid slots
+func update_recipe_grid(recipes_array: Array):
 	var slots = gridContainer.get_children()
 	
-	# Recorremos todos los slots del GridContainer (los 9 cuadros)
 	for i in range(slots.size()):
 		var actualSlot = slots[i]
-		var item_rect = actualSlot.get_node_or_null("Item") # Buscamos el TextureRect "Item"
+		var item_rect = actualSlot.get_node_or_null("Item")
 		
-		if not item_rect: continue # Si el slot no tiene el nodo "Item", saltamos
+		if not item_rect: continue
 		
-		# Verificamos si la receta tiene algo en esta posición (i)
-		# y si no nos hemos pasado del tamaño del array de la receta
-		if i < receta_array.size() and receta_array[i] != null:
-			var material_data = receta_array[i]
-			# Usamos tu función de atlas con el "vector" guardado en la receta
-			item_rect.texture = obtener_icono_atlas(material_data["vector"])
+		if i < recipes_array.size() and recipes_array[i] != null:
+			var material_data = recipes_array[i]
+			item_rect.texture = get_atlas_icon(material_data["vector"])
 			item_rect.visible = true
 		else:
-			# Si la posición es null o la receta es más corta, limpiamos el slot
 			item_rect.texture = null
 
-var receta_actual = null
-
+var actual_recipe = null
 @onready var hotbar = get_tree().get_first_node_in_group("Hotbar")
+
+# this function craft recipes put on the first param
 func craft(recipe):
 	if hotbar.space_remaining() <= 0:
 		return
@@ -354,53 +349,48 @@ func craft(recipe):
 	if has_ingredients(recipe["recipe"]):
 		consume_ingredients(recipe["recipe"])
 	
-		# Convertimos el Vector2i en AtlasTexture antes de enviarlo
-		var result_texture = obtener_icono_atlas(recipe["icon"])
+		var result_texture = get_atlas_icon(recipe["icon"])
 		
-		# Enviamos la textura y usamos el "name" como ID (en minúsculas)
+		# this sends the texture directly to the hotbar
 		hotbar.recolect(result_texture, recipe["id"].to_lower()) 
 		
-		print("Item crafteado: ", recipe["name"])
-		actualizar_lista_crafting() 
+		print("Crafted: ", recipe["name"])
+		update_crafting_list() 
 	else:
-		print("No hay materiales suficientes")
+		print("there's not enough materials")
 
+# to check if the player has the required materials
 func has_ingredients(recipe_array: Array) -> bool:
-	# 1. Agrupamos lo que pide la receta
 	var recipe_cont = {}
 	for slot_data in recipe_array:
 		if slot_data != null:
 			var id_item = slot_data["id"]
 			recipe_cont[id_item] = recipe_cont.get(id_item, 0) + 1
 	
-	# 2. Comprobamos contra la hotbar
 	for id in recipe_cont:
 		var required_amount = recipe_cont[id]
 		var current_amount = 0
 		
 		for slot in hotbar.dataslots:
-			# Importante: Verificamos que 'item' no sea null
 			if slot["item"] != null:
-				# Imprime para debuggear: 
 				print("a: " + slot["item"], " - id: " + id)
 				if slot["item"] == id:
 					current_amount += slot["amount"]
 		
 		if current_amount < required_amount:
-			print("Falta material: ", id, " (Tengo: ", current_amount, "/", required_amount, ")")
+			print("Material missing: ", id, " (Player has: ", current_amount, "/", required_amount, ")")
 			return false
 			
 	return true
 
+# this consume the ingredients from the hotbar and updates the UI
 func consume_ingredients(recipe_array: Array):
-	# 1. Count total required amounts from the 9-slot grid
 	var required_items = {}
 	for slot_data in recipe_array:
 		if slot_data != null:
 			var item_id = slot_data["id"]
 			required_items[item_id] = required_items.get(item_id, 0) + 1
-
-	# 2. Subtract from hotbar
+	
 	for item_id in required_items:
 		var remaining = required_items[item_id]
 		
@@ -415,16 +405,16 @@ func consume_ingredients(recipe_array: Array):
 					remaining -= slot["amount"]
 					slot["amount"] = 0
 				
-				# Clean up slot if empty
 				if slot["amount"] <= 0:
 					slot["item"] = null
 					slot["atlas"] = null
 	
 	hotbar.update_hotbar_ui()
 
+# when the craft button is clicked
 func _on_button_craft_pressed_general():
-	if receta_actual != null:
-		print("Intentando craftear desde el botón: ", receta_actual["name"])
-		craft(receta_actual)
+	if actual_recipe != null:
+		print("Trying the craft: ", actual_recipe["name"])
+		craft(actual_recipe)
 	else:
-		print("No hay ninguna receta seleccionada")
+		print("Any recipe selected")
