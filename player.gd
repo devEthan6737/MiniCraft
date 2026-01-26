@@ -169,9 +169,42 @@ func _process(delta):
 		resetear_minado()
 	
 	if Input.is_action_just_pressed("ui_undo") or Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
-		# Usamos una pequeña flag para no colocar 60 bloques por segundo
-		if Engine.get_frames_drawn() % 10 == 0: # Coloca cada 10 frames si se mantiene
-			place()
+		
+		var current_slot_data = hotbar.dataslots[hotbar.selected_slot]
+		
+		if current_slot_data["item"] != null:
+			var item_id = current_slot_data["item"]
+			
+			if [ "carrotbar", "goldencarrotbar", "health_potion", "big_health_potion" ].has(item_id):
+				consume_item(current_slot_data)
+				lifebar.update_ui()
+			else:
+			# Si no es consumible, intentamos colocarlo como bloque
+				if Engine.get_frames_drawn() % 10 == 0:
+					place()
+
+@onready var lifebar = get_node("../CanvasLayer/HUD/LifeContainer")
+func consume_item(slot):
+	print("Consumiendo: ", slot["item"])
+	
+	match slot["item"]:
+		"health_potion":
+			lifebar.life = min(lifebar.life + 2, lifebar.maxlife)
+		"big_health_potion":
+			lifebar.life = min(lifebar.life + 4, lifebar.maxlife)
+		"carrotbar":
+			lifebar.life = min(lifebar.life + 7, lifebar.maxlife)
+		"goldencarrotbar":
+			lifebar.maxlife = lifebar.maxlife + 1
+			lifebar.life = lifebar.maxlife
+
+	# Reducimos la cantidad y actualizamos la UI
+	slot["amount"] -= 1
+	if slot["amount"] <= 0:
+		slot["item"] = null
+		slot["atlas"] = null
+	
+	hotbar.update_hotbar_ui()
 
 func gestionar_proceso_minado(delta):
 	var pos_raton = get_global_mouse_position()
@@ -344,7 +377,7 @@ func recibir_daño(cantidad):
 	tween.tween_property(sprite, "modulate", Color.WHITE, 0.1)
 	
 	# 3. Comprobamos si el jugador ha muerto usando la vida del LifeContainer
-	if life_container.vida_actual <= 0:
+	if life_container.life <= 0:
 		morir()
 
 func morir():

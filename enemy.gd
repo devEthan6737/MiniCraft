@@ -72,7 +72,42 @@ func recibir_daño(cantidad):
 		morir()
 
 func morir():
+	var rand = randf()
+	var item_position
+	var item = ""
+	
+	if rand > 0.95:
+		item = "carrotbar"
+		item_position = Vector2i(6, 5)
+	elif rand > 0.80:
+		item = "big_health_potion"
+		item_position = Vector2i(6, 7)
+	elif rand > 0.60:
+		item = "health_potion"
+		item_position = Vector2i(5, 7)
+	
+	if item_position:
+		spawn_dropped_item(global_position, item_position, 1, item)
 	queue_free()
+
+@onready var scene = preload("res://DroppedItem.tscn")
+func spawn_dropped_item(pos_global, atlas_coords, _source_id, item_name):
+	var new_item = scene.instantiate()
+	get_parent().add_child(new_item)
+	
+	new_item.global_position = pos_global
+	
+	# Usamos la función configurar que ya teníamos
+	# El tercer parámetro es el nombre que usará el crafteo ("health_potion")
+	new_item.configurar(atlas_coords, 1, item_name)
+	
+	# Opcional: Un pequeño salto físico para que se vea que "cae" del enemigo
+	var tween = create_tween()
+	var jump = pos_global + Vector2(randf_range(-20, 20), -30)
+	var floor = jump + Vector2(0, 30)
+	
+	tween.tween_property(new_item, "global_position", jump, 0.2).set_trans(Tween.TRANS_QUAD)
+	tween.tween_property(new_item, "global_position", floor, 0.4).set_ease(Tween.EASE_OUT)
 
 func revisar_contacto_jugador():
 	# Obtenemos los cuerpos que están dentro del Area2D del enemigo
