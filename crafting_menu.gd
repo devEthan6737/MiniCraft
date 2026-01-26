@@ -296,8 +296,9 @@ func actualizar_lista_crafting():
 		# Conectamos el click
 		nueva_receta.pressed.connect(_on_receta_seleccionada.bind(data))
 
-@onready var res_icono = $VBoxContainer/HBoxContainer/SeccionIzquierda/Resultado/TextureRect/Item
-@onready var res_nombre = $VBoxContainer/HBoxContainer/SeccionIzquierda/Resultado/Label
+@onready var res_icono = $VBoxContainer/HBoxContainer/SeccionIzquierda/Result/TextureRect/Item
+@onready var res_nombre = $VBoxContainer/HBoxContainer/SeccionIzquierda/Result/Label
+@onready var button = $VBoxContainer/HBoxContainer/SeccionIzquierda/Result/TextureRect/Item/Button
 @onready var gridContainer = $VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer
 
 func _on_receta_seleccionada(data):
@@ -309,6 +310,8 @@ func _on_receta_seleccionada(data):
 	
 	# 2. Guardamos la receta actual
 	receta_actual = data
+	
+	button.pressed.connect(_on_button_craft_pressed.bind(receta_actual))
 	
 	# 3. Dibujamos la receta en el GridContainer
 	actualizar_grid_receta(data["recipe"])
@@ -335,3 +338,63 @@ func actualizar_grid_receta(receta_array: Array):
 			item_rect.texture = null
 
 var receta_actual = null
+
+@onready var hotbar = get_tree().get_first_node_in_group("Hotbar")
+func craft(recipe):
+	if hotbar.space_remaining() <= 0:
+		return
+
+	if has_ingredients(recipe["recipe"]):
+		consume_ingredients(recipe["recipe"])
+		hotbar.recolect(recipe["icon"]) 
+		print("Item crafteado")
+		actualizar_lista_crafting() 
+	else:
+		print("No hay materiales suficientes")
+
+func has_ingredients(recipe_array: Array) -> bool:
+	var recipe_cont = {}
+	for slot_data in recipe_array:
+		if slot_data != null:
+			var id_item = slot_data["id"]
+			recipe_cont[id_item] = recipe_cont.get(id_item, 0) + 1
+	
+	for id in recipe_cont:
+		var requeried_amount = recipe_cont[id]
+		var amount = 0
+		
+		for slot in hotbar.dataslots:
+			if slot["item"] != null:
+				if slot["item"].has_meta("object_type") and slot["item"].get_meta("object_type") == id:
+					amount += slot["amount"]
+		
+		if amount < requeried_amount:
+			print("Falta: ", id, " ", requeried_amount)
+			return false
+			
+	return true
+
+func consume_ingredients(ingredients):
+	for item_name in ingredients:
+		var remaining = ingredients[item_name]
+		
+		for slot in hotbar.dataslots:
+			if remaining <= 0: break
+			
+			if slot["item"] != null and slot["item"].get_meta("type") == item_name:
+				if slot["amount"] >= remaining:
+					slot["amount"] -= remaining
+					remaining = 0
+				else:
+					remaining -= slot["amount"]
+					slot["amount"] = 0
+				
+				if slot["amount"] <= 0:
+					slot["item"] = null
+	
+	hotbar.update_hotbar_ui()
+
+func _on_button_craft_pressed(selected_recipe):
+	print("Intentando craftear: ", selected_recipe["name"])
+	
+	craft(selected_recipe)

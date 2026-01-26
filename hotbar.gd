@@ -36,6 +36,14 @@ func change_slot(direction):
 	var _new = wrapi(selected_slot + direction, 0, slots.size())
 	select(_new)
 
+func space_remaining() -> int:
+	var index = 0;
+	for x in range(dataslots.size()):
+		if !dataslots[x]["locked"] and (dataslots[x]["amount"] == 0 or dataslots[x]["amount"] == null):
+			index += 1
+	
+	return index
+
 func select(index):
 	var max_index = 0;
 	for x in range(dataslots.size()):

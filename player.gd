@@ -96,6 +96,7 @@ const DIRT_BACKGROUND = Vector2i(12, 0)
 const ROCK_BACKGROUND = Vector2i(3, 2)
 const WOOD = Vector2i(7, 4)
 const STICK = Vector2i(7, 3)
+const GRASS = Vector2i(3, 0)
 @onready var item_escena = preload("res://DroppedItem.tscn")
 func minar():
 	var pos_raton = get_global_mouse_position()
@@ -131,6 +132,8 @@ func minar():
 				for x in range(2):
 					soltar_item(Vector2i(pos_mapa.x - 1, pos_mapa.y), STICK, source_id)
 					soltar_item(Vector2i(pos_mapa.x + 1, pos_mapa.y), WOOD, source_id)
+			elif [ "grass", "ramp_v1_left", "ramp_v1_right", "ramp_v2_right", "ramp_v2_left", "ramp_v3_left", "ramp_v3_right", "ramp_filler_v1", "ramp_filler_v2" ].has(tipo):
+				soltar_item(Vector2i(pos_mapa.x - 1, pos_mapa.y), GRASS, source_id)
 			else:
 				soltar_item(pos_mapa, atlas_coords, source_id)
 			
