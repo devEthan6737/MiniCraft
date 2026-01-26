@@ -94,6 +94,8 @@ func atacar_o_minar():
 
 const DIRT_BACKGROUND = Vector2i(12, 0)
 const ROCK_BACKGROUND = Vector2i(3, 2)
+const WOOD = Vector2i(7, 4)
+const STICK = Vector2i(7, 3)
 @onready var item_escena = preload("res://DroppedItem.tscn")
 func minar():
 	var pos_raton = get_global_mouse_position()
@@ -120,7 +122,17 @@ func minar():
 			var atlas_coords = terrain.get_cell_atlas_coords(pos_mapa)
 			var source_id = terrain.get_cell_source_id(pos_mapa)
 			
-			soltar_item(pos_mapa, atlas_coords, source_id)
+			if tipo == "tree":
+				terrain.set_cell(Vector2i(pos_mapa.x, pos_mapa.y + 1), 1, Vector2i(5, 5))
+				for x in range(3):
+					soltar_item(Vector2i(pos_mapa.x - 1, pos_mapa.y), STICK, source_id)
+					soltar_item(Vector2i(pos_mapa.x + 1, pos_mapa.y), WOOD, source_id)
+			elif tipo == "stump":
+				for x in range(2):
+					soltar_item(Vector2i(pos_mapa.x - 1, pos_mapa.y), STICK, source_id)
+					soltar_item(Vector2i(pos_mapa.x + 1, pos_mapa.y), WOOD, source_id)
+			else:
+				soltar_item(pos_mapa, atlas_coords, source_id)
 			
 			# Eliminamos el bloque
 			if (pos_mapa.y >= 6):
@@ -199,7 +211,7 @@ func actualizar_selector():
 	# --- LÓGICA DE PREVISUALIZACIÓN ---
 	var preview_sprite = selector.get_node_or_null("Preview")
 	if preview_sprite and hotbar:
-		var slot_actual = hotbar.dataslots[hotbar.slot_seleccionado]
+		var slot_actual = hotbar.dataslots[hotbar.selected_slot]
 		
 		if slot_actual["item"] != null:
 			preview_sprite.texture = slot_actual["item"].atlas
@@ -262,7 +274,7 @@ func place():
 		
 	# 3. Pedir el ítem a la hotbar
 	if hotbar:
-		var slot = hotbar.dataslots[hotbar.slot_seleccionado]
+		var slot = hotbar.dataslots[hotbar.selected_slot]
 		if slot["item"] != null and slot["amount"] > 0:
 			# Colocamos el bloque en el TileMap
 			# Usamos los datos guardados en el AtlasTexture del slot
@@ -276,12 +288,12 @@ func place():
 			if slot["amount"] <= 0:
 				slot["item"] = null
 			
-			hotbar.actualizar_interfaz_hotbar()
+			hotbar.update_hotbar_ui()
 
 func soltar_item_desde_hotbar():
 	if not hotbar: return
 	
-	var slot = hotbar.dataslots[hotbar.slot_seleccionado]
+	var slot = hotbar.dataslots[hotbar.selected_slot]
 	
 	# Si hay algo que soltar
 	if slot["item"] != null and slot["amount"] > 0:
@@ -308,7 +320,7 @@ func soltar_item_desde_hotbar():
 		if slot["amount"] <= 0:
 			slot["item"] = null
 		
-		hotbar.actualizar_interfaz_hotbar()
+		hotbar.update_hotbar_ui()
 
 @onready var life_container = get_node("../CanvasLayer/HUD/LifeContainer")
 

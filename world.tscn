@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://bcrvy6gvkgelp" path="res://animations.png" id="4_ioo17"]
 [ext_resource type="Script" uid="uid://whwxcprhvd88" path="res://hotbar.gd" id="5_dwbse"]
 [ext_resource type="FontFile" uid="uid://dn0lu4a6c01rq" path="res://Monocraft-ttf/Monocraft.ttf" id="7_gbfbk"]
-[ext_resource type="Texture2D" uid="uid://xh1iyxpxpce8" path="res://uisprites.png" id="7_ioo17"]
+[ext_resource type="Texture2D" uid="uid://j7s3ms53obd8" path="res://uisprites.png" id="7_ioo17"]
 [ext_resource type="Script" uid="uid://bnqc1redmacro" path="res://life_container.gd" id="7_pkg7o"]
 [ext_resource type="Script" uid="uid://d26n5uulqlngi" path="res://crafting_menu.gd" id="9_ioo17"]
 
@@ -116,6 +116,8 @@ texture = ExtResource("1_tlwt5")
 4:1/0/custom_data_0 = "tree"
 4:1/0/custom_data_1 = 3
 5:5/0 = 0
+5:5/0/custom_data_0 = "stump"
+5:5/0/custom_data_1 = 2
 7:4/0 = 0
 4:6/0 = 0
 7:3/0 = 0
@@ -269,28 +271,28 @@ load_path = "res://.godot/imported/uisprites.png-fd83a9529537075db77b4319677c2c6
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ioo17"]
 atlas = SubResource("CompressedTexture2D_gbfbk")
-region = Rect2(32, 96, 16, 16)
+region = Rect2(16, 96, 16, 16)
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_wse8f"]
 load_path = "res://.godot/imported/uisprites.png-fd83a9529537075db77b4319677c2c67.ctex"
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ic0uy"]
 atlas = SubResource("CompressedTexture2D_wse8f")
-region = Rect2(32, 96, 16, 16)
+region = Rect2(16, 96, 16, 16)
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_k3n1d"]
 load_path = "res://.godot/imported/uisprites.png-fd83a9529537075db77b4319677c2c67.ctex"
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_2o6r5"]
 atlas = SubResource("CompressedTexture2D_k3n1d")
-region = Rect2(32, 96, 16, 16)
+region = Rect2(16, 96, 16, 16)
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_ioo17"]
 load_path = "res://.godot/imported/uisprites.png-fd83a9529537075db77b4319677c2c67.ctex"
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_k3n1d"]
 atlas = SubResource("CompressedTexture2D_ioo17")
-region = Rect2(32, 96, 16, 16)
+region = Rect2(16, 96, 16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_dwbse"]
 region = Rect2(48, 96, 16, 16)
@@ -374,7 +376,7 @@ libraries = {
 [node name="DayNightTimer" type="CanvasModulate" parent="."]
 
 [node name="Timer" type="Timer" parent="DayNightTimer"]
-wait_time = 10.0
+wait_time = 30.0
 one_shot = true
 autostart = true
 
@@ -527,6 +529,7 @@ stretch_mode = 5
 
 [node name="CraftingMenu" type="Panel" parent="CanvasLayer/HUD"]
 process_mode = 3
+visible = false
 clip_contents = true
 custom_minimum_size = Vector2(600, 400)
 layout_mode = 1
