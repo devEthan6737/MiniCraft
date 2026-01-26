@@ -6,6 +6,8 @@ var JUMP_VELOCITY = -300.0
 var damage = 1
 var can_attack = 1
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
+var empuje_actual = Vector2.ZERO
+var friccion_empuje = 800.0
 
 @onready var attack_cooldown = 1.0
 @onready var player = get_tree().get_first_node_in_group("Player")
@@ -14,48 +16,46 @@ var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 @onready var detector_pared = $RayCast2D # Referencia al nuevo nodo
 
 func _physics_process(delta):
+	# 1. Aplicar gravedad siempre
 	if not is_on_floor():
 		velocity.y += gravity * delta
 		
-	if player:
-		# Calculamos la distancia real entre centros
+	# 2. LÓGICA DE EMPUJE (Knockback)
+	# Si el empuje es mayor a 10, el zombie pierde el control y sale volando
+	if empuje_actual.length() > 10:
+		velocity.x = empuje_actual.x
+		# La fricción va frenando el empuje poco a poco
+		empuje_actual = empuje_actual.move_toward(Vector2.ZERO, friccion_empuje * delta)
+	
+	# 3. LÓGICA DE MOVIMIENTO (IA)
+	# Solo se ejecuta si NO está siendo empujado con fuerza
+	elif player:
 		var diff_x = player.global_position.x - global_position.x
 		var direccion_x = sign(diff_x)
-		
-		# MARGEN SIMÉTRICO: Prueba con 35 para que se note el espacio
 		var margen_parada = 40.0
 		
-		# Control de movimiento con zona muerta simétrica
 		if abs(diff_x) > margen_parada:
 			velocity.x = direccion_x * SPEED
 		else:
-			# Si entramos en el margen, frenamos gradualmente para evitar rebotes
 			velocity.x = move_toward(velocity.x, 0, SPEED)
 			
-		# Girar el sprite
 		if direccion_x != 0:
 			sprite.flip_h = direccion_x < 0
 		
-		# AJUSTE DEL RAYCAST: Lo reseteamos al centro y lo lanzamos según dirección
-		detector_pared.position.x = 0 
+		# Salto por pared o por posición del jugador
 		detector_pared.target_position.x = direccion_x * 25
-
-		# SALTO: Solo si es terreno
-		if is_on_floor() and detector_pared.is_colliding():
-			var col = detector_pared.get_collider()
-			if col is TileMap or col is TileMapLayer:
+		if is_on_floor():
+			var dist = abs(diff_x)
+			var col_pared = detector_pared.is_colliding()
+			var jugador_arriba = player.global_position.y < global_position.y - 40
+			
+			if (col_pared and (detector_pared.get_collider() is TileMap or detector_pared.get_collider() is TileMapLayer)) or (dist < 50 and dist > 10 and jugador_arriba):
 				velocity.y = JUMP_VELOCITY
 				anim.play("jump")
-		
-		# SALTO VERTICAL: Corregido (Si está entre 10 y 50 px de distancia y tú arriba)
-		var dist = abs(diff_x)
-		if is_on_floor() and dist < 50 and dist > 10 and player.global_position.y < global_position.y - 40:
-			velocity.y = JUMP_VELOCITY
-			anim.play("jump")
 	else:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
-		anim.play("walk")
-	
+
+	# 4. Mover al personaje
 	move_and_slide()
 	
 	actualizar_animaciones()
@@ -63,11 +63,20 @@ func _physics_process(delta):
 	if player and can_attack:
 		revisar_contacto_jugador()
 
-func recibir_daño(cantidad):
+func recibir_daño(cantidad, vector_empuje = Vector2.ZERO):
 	vida -= cantidad
+	
+	# Aplicamos el empuje
+	empuje_actual = vector_empuje
+	# Un pequeño salto extra hacia arriba hace que el empuje quede más "profesional"
+	if is_on_floor():
+		velocity.y = -100 
+	
+	# Efecto visual
 	var tween = create_tween()
 	tween.tween_property(sprite, "modulate", Color.RED, 0.1)
 	tween.tween_property(sprite, "modulate", Color.WHITE, 0.1)
+	
 	if vida <= 0:
 		morir()
 

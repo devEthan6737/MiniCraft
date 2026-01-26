@@ -83,6 +83,9 @@ func _input(event):
 			craftmenu.toggle_menu()
 
 func atacar_o_minar():
+	if global_position.distance_to(selector.global_position) > (range_minado + 50):
+		return
+
 	# 1. Detección física en el punto del selector (Capa 2: Enemigos)
 	var espacio_fisico = get_world_2d().direct_space_state
 	var parametros = PhysicsPointQueryParameters2D.new()
@@ -92,12 +95,38 @@ func atacar_o_minar():
 	var resultados = espacio_fisico.intersect_point(parametros)
 	
 	if resultados.size() > 0:
-		var objeto = resultados[0].collider
-		if objeto.has_method("recibir_daño"):
-			objeto.recibir_daño(100)
-			# Animación rápida de golpe
-			anim.play("walk") 
-			return # No picamos el bloque si golpeamos a alguien
+		var enemigo = resultados[0].collider
+		if enemigo.has_method("recibir_daño"):
+			var daño = 5 # Daño base (mano)
+			var fuerza_empuje = 300.0 # Empuje base
+			var item_id = hotbar.dataslots[hotbar.selected_slot]["item"]
+			match item_id:
+				"woodensword":
+					daño = 10
+					fuerza_empuje = 400.0
+				"ironsword":
+					daño = 25
+					fuerza_empuje = 450.0
+				"diamondsword":
+					daño = 500
+					fuerza_empuje = 600.0
+				_: # Mano o cualquier otro item
+					daño = 5
+			
+			var direccion_empuje = (enemigo.global_position - global_position).normalized()
+			
+			# C. APLICAR DAÑO Y EMPUJE
+			# Nota: Tienes que actualizar el script del enemigo (ver punto 2 abajo)
+			enemigo.recibir_daño(daño, direccion_empuje * fuerza_empuje)
+			
+			# Animación de ataque (si tienes una llamada "attack", úsala)
+			# Si no, usamos un pequeño tween para simular el golpe visualmente
+			var tween = create_tween()
+			tween.tween_property(sprite, "rotation", 0.5 if !sprite.flip_h else -0.5, 0.1)
+			tween.tween_property(sprite, "rotation", 0.0, 0.1)
+			
+			return # Si golpeamos enemigo, no picamos bloque
+	#minar()
 
 const DIRT_BACKGROUND = Vector2i(12, 0)
 const ROCK_BACKGROUND = Vector2i(3, 2)
