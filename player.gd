@@ -166,8 +166,8 @@ func putBackground (_position, type):
 @onready var selector = get_node("../Cursor") # Ajusta la ruta a tu nodo
 
 func _process(delta):
-	if menu_open: return
 	actualizar_selector()
+	if menu_open: return
 	
 	# Si mantenemos el clic izquierdo pulsado
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -286,11 +286,12 @@ func soltar_item(pos_mapa, atlas_coords, source_id, meta_type = null):
 	
 	var tile_data = terrain.get_cell_tile_data(pos_mapa)
 	var tipo_string = ""
-	if tile_data:
-		tipo_string = tile_data.get_custom_data("object_type")
-	else:
+	if meta_type:
 		tipo_string = meta_type
-	print("papapapapa: ", tipo_string)
+	elif tile_data:
+		tipo_string = tile_data.get_custom_data("object_type")
+
+	print("soltar tipo: ", tipo_string)
 	# Le pasamos la imagen que debe tener
 	nuevo_item.configurar(atlas_coords, source_id, tipo_string)
 	

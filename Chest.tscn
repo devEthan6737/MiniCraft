@@ -1,22 +1,71 @@
-[gd_scene load_steps=4 format=3 uid="uid://crsbt0xf3xwnp"]
+[gd_scene load_steps=6 format=3 uid="uid://crsbt0xf3xwnp"]
 
-[ext_resource type="Script" uid="uid://cd7odurj32k53" path="res://chest.gd" id="1_4gslm"]
 [ext_resource type="Texture2D" uid="uid://ctvlxeiq7m0ap" path="res://sprites001.png" id="2_5udua"]
+
+[sub_resource type="GDScript" id="GDScript_4gslm"]
+script/source = "extends Area2D
+
+@onready var prompt = $KeyPrompt # O el nombre que tenga tu nodo de texto
+var items = []
+
+func _ready():
+	prompt.visible = false
+	# Usamos 'self' porque el script ya está en el Area2D
+	self.body_entered.connect(_on_body_entered)
+	self.body_exited.connect(_on_body_exited)
+	
+	for i in range(4):
+		items.append(
+			{
+				\"item\": null,
+				\"amount\": 0,
+				\"atlas\": null
+			}
+		)
+
+func _on_body_entered(body):
+	if body.is_in_group(\"Player\"):
+		body.near_chest = self
+		prompt.visible = true
+
+func _on_body_exited(body):
+	if body.is_in_group(\"Player\"):
+		body.near_chest = null
+		prompt.visible = false
+
+func interact():
+	print(\"interactuando\")
+	var ui = get_tree().get_first_node_in_group(\"ChestUI\")
+	if ui:
+		ui.open_chest(self)
+"
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_hkml5"]
 atlas = ExtResource("2_5udua")
 region = Rect2(48, 48, 16, 16)
 
-[node name="Chest" type="StaticBody2D"]
-script = ExtResource("1_4gslm")
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5udua"]
+size = Vector2(14, 15)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_5udua"]
+radius = 21.0
+
+[node name="Chest" type="Area2D"]
+script = SubResource("GDScript_4gslm")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
 texture = SubResource("AtlasTexture_hkml5")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 0.5)
+shape = SubResource("RectangleShape2D_5udua")
 
 [node name="KeyPrompt" type="Label" parent="."]
 offset_right = 40.0
 offset_bottom = 23.0
 
 [node name="Detector" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Detector"]
+shape = SubResource("CircleShape2D_5udua")
