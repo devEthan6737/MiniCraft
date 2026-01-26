@@ -4,15 +4,15 @@ var selected_slot = 0
 var slots = []
 
 var dataslots = [
-	{ "item": null, "locked": false, "amount": 0 },
-	{ "item": null, "locked": false, "amount": 0 },
-	{ "item": null, "locked": false, "amount": 0 },
-	{ "item": null, "locked": false, "amount": 0 },
-	{ "item": null, "locked": false, "amount": 0 },
-	{ "item": null, "locked": true, "amount": 0 },
-	{ "item": null, "locked": true, "amount": 0 },
-	{ "item": null, "locked": true, "amount": 0 },
-	{ "item": null, "locked": true, "amount": 0 }
+	{ "item": null, "atlas": null, "locked": false, "amount": 0 },
+	{ "item": null, "atlas": null, "locked": false, "amount": 0 },
+	{ "item": null, "atlas": null, "locked": false, "amount": 0 },
+	{ "item": null, "atlas": null, "locked": false, "amount": 0 },
+	{ "item": null, "atlas": null, "locked": false, "amount": 0 },
+	{ "item": null, "atlas": null, "locked": true, "amount": 0 },
+	{ "item": null, "atlas": null, "locked": true, "amount": 0 },
+	{ "item": null, "atlas": null, "locked": true, "amount": 0 },
+	{ "item": null, "atlas": null, "locked": true, "amount": 0 }
 ]
 
 func _ready():
@@ -69,22 +69,23 @@ func update_selection():
 			s.scale = Vector2(1.0, 1.0)
 			s.z_index = 0
 
-func recolect(item_id):
+func recolect(atlas_id, item_id):
 	# Buscar si ya existe el ítem Y tiene espacio para más
 	for i in range(dataslots.size()):
 		var slot = dataslots[i]
 		# Comprobamos: que no esté bloqueado, que tenga el mismo ítem y que no haya llegado a 67
-		if not slot["locked"] and slot["item"] != null:
-			if slot["item"].region == item_id.region and slot["amount"] < 67:
+		if not slot["locked"] and slot["atlas"] != null:
+			if slot["atlas"].region == atlas_id.region and slot["amount"] < 67:
 				slot["amount"] += 1
 				update_hotbar_ui()
 				return true
 
 	# Si no se pudo sumar a ningún slot existente, buscar uno vacío
 	for i in range(dataslots.size()):
-		if not dataslots[i]["locked"] and dataslots[i]["item"] == null:
+		if not dataslots[i]["locked"] and dataslots[i]["atlas"] == null:
 			dataslots[i]["item"] = item_id
 			dataslots[i]["amount"] = 1
+			dataslots[i]["atlas"] = atlas_id
 			update_hotbar_ui()
 			return true
 			
@@ -131,8 +132,8 @@ func update_hotbar_ui():
 			icon.texture = get_slot_texture(Vector2i(2, 6))
 			icon.show()
 			label.hide()
-		elif data["item"] != null:
-			icon.texture = data["item"]
+		elif data["atlas"] != null:
+			icon.texture = data["atlas"]
 			icon.show()
 			label.text = str(data["amount"])
 			label.show()

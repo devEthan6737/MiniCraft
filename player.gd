@@ -126,14 +126,14 @@ func minar():
 			if tipo == "tree":
 				terrain.set_cell(Vector2i(pos_mapa.x, pos_mapa.y + 1), 1, Vector2i(5, 5))
 				for x in range(3):
-					soltar_item(Vector2i(pos_mapa.x - 1, pos_mapa.y), STICK, source_id)
-					soltar_item(Vector2i(pos_mapa.x + 1, pos_mapa.y), WOOD, source_id)
+					soltar_item(Vector2i(pos_mapa.x - 1, pos_mapa.y), STICK, source_id, "stick")
+					soltar_item(Vector2i(pos_mapa.x + 1, pos_mapa.y), WOOD, source_id, "wood")
 			elif tipo == "stump":
 				for x in range(2):
-					soltar_item(Vector2i(pos_mapa.x - 1, pos_mapa.y), STICK, source_id)
-					soltar_item(Vector2i(pos_mapa.x + 1, pos_mapa.y), WOOD, source_id)
+					soltar_item(Vector2i(pos_mapa.x - 1, pos_mapa.y), STICK, source_id, "stick")
+					soltar_item(Vector2i(pos_mapa.x + 1, pos_mapa.y), WOOD, source_id, "wood")
 			elif [ "grass", "ramp_v1_left", "ramp_v1_right", "ramp_v2_right", "ramp_v2_left", "ramp_v3_left", "ramp_v3_right", "ramp_filler_v1", "ramp_filler_v2" ].has(tipo):
-				soltar_item(Vector2i(pos_mapa.x - 1, pos_mapa.y), GRASS, source_id)
+				soltar_item(Vector2i(pos_mapa.x - 1, pos_mapa.y), GRASS, source_id, "dirt")
 			else:
 				soltar_item(pos_mapa, atlas_coords, source_id)
 			
@@ -216,10 +216,10 @@ func actualizar_selector():
 	if preview_sprite and hotbar:
 		var slot_actual = hotbar.dataslots[hotbar.selected_slot]
 		
-		if slot_actual["item"] != null:
-			preview_sprite.texture = slot_actual["item"].atlas
+		if slot_actual["atlas"] != null:
+			preview_sprite.texture = slot_actual["atlas"].atlas
 			preview_sprite.region_enabled = true
-			preview_sprite.region_rect = slot_actual["item"].region
+			preview_sprite.region_rect = slot_actual["atlas"].region
 			preview_sprite.scale = Vector2(0.5, 0.5)
 			preview_sprite.modulate = Color(1, 1, 1, 0.5) # Transparente
 			preview_sprite.show()
@@ -235,7 +235,7 @@ func actualizar_selector():
 	else:
 		selector.modulate = Color(1, 1, 1, 0.9)
 
-func soltar_item(pos_mapa, atlas_coords, source_id):
+func soltar_item(pos_mapa, atlas_coords, source_id, meta_type = null):
 	var nuevo_item = item_escena.instantiate()
 	
 	# Lo añadimos a la escena "World" (el padre del player)
@@ -244,8 +244,15 @@ func soltar_item(pos_mapa, atlas_coords, source_id):
 	# Lo posicionamos donde estaba el bloque
 	nuevo_item.global_position = terrain.map_to_local(pos_mapa)
 	
+	var tile_data = terrain.get_cell_tile_data(pos_mapa)
+	var tipo_string = ""
+	if tile_data:
+		tipo_string = tile_data.get_custom_data("object_type")
+	else:
+		tipo_string = meta_type
+	print("papapapapa: ", tipo_string)
 	# Le pasamos la imagen que debe tener
-	nuevo_item.configurar(atlas_coords, source_id)
+	nuevo_item.configurar(atlas_coords, source_id, tipo_string)
 	
 	# --- ANIMACIÓN DE CAÍDA (Tween) ---
 	# Hacemos que "salte" un poco al salir y luego caiga
@@ -273,15 +280,15 @@ func place():
 			pass
 		else:
 			return
-
-		
+	
+	
 	# 3. Pedir el ítem a la hotbar
 	if hotbar:
 		var slot = hotbar.dataslots[hotbar.selected_slot]
-		if slot["item"] != null and slot["amount"] > 0:
+		if slot["atlas"] != null and slot["amount"] > 0:
 			# Colocamos el bloque en el TileMap
 			# Usamos los datos guardados en el AtlasTexture del slot
-			var atlas_coords = Vector2i(slot["item"].region.position / 16.0)
+			var atlas_coords = Vector2i(slot["atlas"].region.position / 16.0)
 			terrain.set_cell(pos_mapa, 1, atlas_coords)
 			
 			# 4. Restar cantidad
@@ -289,7 +296,7 @@ func place():
 			
 			# 5. Si se acaba, limpiar el slot
 			if slot["amount"] <= 0:
-				slot["item"] = null
+				slot["atlas"] = null
 			
 			hotbar.update_hotbar_ui()
 
@@ -299,7 +306,7 @@ func soltar_item_desde_hotbar():
 	var slot = hotbar.dataslots[hotbar.selected_slot]
 	
 	# Si hay algo que soltar
-	if slot["item"] != null and slot["amount"] > 0:
+	if slot["atlas"] != null and slot["amount"] > 0:
 		# 1. Instanciar el ítem en el mundo
 		var drop = item_escena.instantiate()
 		get_parent().add_child(drop)
@@ -308,8 +315,8 @@ func soltar_item_desde_hotbar():
 		drop.global_position = global_position + Vector2(10 * (3 if velocity.x >= 0 else -3), -5)
 		
 		# 3. Configurarlo (necesitamos sacar atlas_coords del region del slot)
-		var atlas_coords = Vector2i(slot["item"].region.position / 16.0)
-		drop.configurar(atlas_coords, 0) # El 0 es el source_id por defecto
+		var atlas_coords = Vector2i(slot["atlas"].region.position / 16.0)
+		drop.configurar(atlas_coords, 0, slot["item"]) # El 0 es el source_id por defecto
 		
 		# 4. Aplicar un impulso físico visual (usando tu lógica de Tween)
 		var direccion_suelta = 20 if velocity.x >= 0 else -20
@@ -321,7 +328,7 @@ func soltar_item_desde_hotbar():
 		# 5. Restar de la hotbar
 		slot["amount"] -= 1
 		if slot["amount"] <= 0:
-			slot["item"] = null
+			slot["atlas"] = null
 		
 		hotbar.update_hotbar_ui()
 

@@ -1,5 +1,10 @@
 extends Control
 
+@onready var button = $VBoxContainer/HBoxContainer/SeccionIzquierda/Result/TextureRect/Item/Button
+
+func _ready() -> void:
+	button.pressed.connect(_on_button_craft_pressed_general)
+
 func _input(event):
 	if event.is_action_pressed("ui_crafting") or (event is InputEventKey and event.keycode == KEY_E and event.pressed):
 		toggle_menu()
@@ -22,6 +27,7 @@ const TILE_SIZE = 16
 var recetas = [
 	{
 		"name": "Chest",
+		"id": "chest",
 		"icon": Vector2i(3, 3),
 		"recipe": [
 			{
@@ -45,6 +51,7 @@ var recetas = [
 	},
 	{
 		"name": "Furnace",
+		"id": "furnace",
 		"icon": Vector2i(1, 2),
 		"recipe": [
 			{
@@ -81,6 +88,7 @@ var recetas = [
 	},
 	{
 		"name": "Wooden Pickaxe",
+		"id": "woodenpickaxe",
 		"icon": Vector2i(4, 6),
 		"recipe": [
 			{
@@ -111,6 +119,7 @@ var recetas = [
 	},
 	{
 		"name": "Stone Pickaxe",
+		"id": "stonepickaxe",
 		"icon": Vector2i(3, 6),
 		"recipe": [
 			{
@@ -141,6 +150,7 @@ var recetas = [
 	},
 	{
 		"name": "Iron Pickaxe",
+		"id": "ironpickaxe",
 		"icon": Vector2i(2, 6),
 		"recipe": [
 			{
@@ -171,6 +181,7 @@ var recetas = [
 	},
 	{
 		"name": "Wooden Sword",
+		"id": "woodensword",
 		"icon": Vector2i(4, 7),
 		"recipe": [
 			null,
@@ -195,6 +206,7 @@ var recetas = [
 	},
 	{
 		"name": "Iron Sword",
+		"id": "ironsword",
 		"icon": Vector2i(3, 7),
 		"recipe": [
 			null,
@@ -219,6 +231,7 @@ var recetas = [
 	},
 	{
 		"name": "Diamond Sword",
+		"id": "diamondsword",
 		"icon": Vector2i(2, 7),
 		"recipe": [
 			null,
@@ -243,6 +256,7 @@ var recetas = [
 	},
 	{
 		"name": "Golden Carrot Bar",
+		"id": "goldencarrotbar",
 		"icon": Vector2i(6, 6),
 		"recipe": [
 			null,
@@ -298,7 +312,6 @@ func actualizar_lista_crafting():
 
 @onready var res_icono = $VBoxContainer/HBoxContainer/SeccionIzquierda/Result/TextureRect/Item
 @onready var res_nombre = $VBoxContainer/HBoxContainer/SeccionIzquierda/Result/Label
-@onready var button = $VBoxContainer/HBoxContainer/SeccionIzquierda/Result/TextureRect/Item/Button
 @onready var gridContainer = $VBoxContainer/HBoxContainer/SeccionIzquierda/GridContainer
 
 func _on_receta_seleccionada(data):
@@ -310,8 +323,6 @@ func _on_receta_seleccionada(data):
 	
 	# 2. Guardamos la receta actual
 	receta_actual = data
-	
-	button.pressed.connect(_on_button_craft_pressed.bind(receta_actual))
 	
 	# 3. Dibujamos la receta en el GridContainer
 	actualizar_grid_receta(data["recipe"])
@@ -343,45 +354,64 @@ var receta_actual = null
 func craft(recipe):
 	if hotbar.space_remaining() <= 0:
 		return
-
+	
 	if has_ingredients(recipe["recipe"]):
 		consume_ingredients(recipe["recipe"])
-		hotbar.recolect(recipe["icon"]) 
-		print("Item crafteado")
+	
+		# Convertimos el Vector2i en AtlasTexture antes de enviarlo
+		var result_texture = obtener_icono_atlas(recipe["icon"])
+		
+		# Enviamos la textura y usamos el "name" como ID (en minúsculas)
+		hotbar.recolect(result_texture, recipe["name"].to_lower()) 
+		
+		print("Item crafteado: ", recipe["name"])
 		actualizar_lista_crafting() 
 	else:
 		print("No hay materiales suficientes")
 
 func has_ingredients(recipe_array: Array) -> bool:
+	# 1. Agrupamos lo que pide la receta
 	var recipe_cont = {}
 	for slot_data in recipe_array:
 		if slot_data != null:
 			var id_item = slot_data["id"]
 			recipe_cont[id_item] = recipe_cont.get(id_item, 0) + 1
 	
+	# 2. Comprobamos contra la hotbar
 	for id in recipe_cont:
-		var requeried_amount = recipe_cont[id]
-		var amount = 0
+		var required_amount = recipe_cont[id]
+		var current_amount = 0
 		
 		for slot in hotbar.dataslots:
+			# Importante: Verificamos que 'item' no sea null
 			if slot["item"] != null:
-				if slot["item"].has_meta("object_type") and slot["item"].get_meta("object_type") == id:
-					amount += slot["amount"]
+				# Imprime para debuggear: 
+				print("a: " + slot["item"], " - id: " + id)
+				if slot["item"] == id:
+					current_amount += slot["amount"]
 		
-		if amount < requeried_amount:
-			print("Falta: ", id, " ", requeried_amount)
+		if current_amount < required_amount:
+			print("Falta material: ", id, " (Tengo: ", current_amount, "/", required_amount, ")")
 			return false
 			
 	return true
 
-func consume_ingredients(ingredients):
-	for item_name in ingredients:
-		var remaining = ingredients[item_name]
+func consume_ingredients(recipe_array: Array):
+	# 1. Count total required amounts from the 9-slot grid
+	var required_items = {}
+	for slot_data in recipe_array:
+		if slot_data != null:
+			var item_id = slot_data["id"]
+			required_items[item_id] = required_items.get(item_id, 0) + 1
+
+	# 2. Subtract from hotbar
+	for item_id in required_items:
+		var remaining = required_items[item_id]
 		
 		for slot in hotbar.dataslots:
-			if remaining <= 0: break
+			if remaining <= 0: break 
 			
-			if slot["item"] != null and slot["item"].get_meta("type") == item_name:
+			if slot["item"] != null and slot["item"] == item_id:
 				if slot["amount"] >= remaining:
 					slot["amount"] -= remaining
 					remaining = 0
@@ -389,12 +419,16 @@ func consume_ingredients(ingredients):
 					remaining -= slot["amount"]
 					slot["amount"] = 0
 				
+				# Clean up slot if empty
 				if slot["amount"] <= 0:
 					slot["item"] = null
+					slot["atlas"] = null
 	
 	hotbar.update_hotbar_ui()
 
-func _on_button_craft_pressed(selected_recipe):
-	print("Intentando craftear: ", selected_recipe["name"])
-	
-	craft(selected_recipe)
+func _on_button_craft_pressed_general():
+	if receta_actual != null:
+		print("Intentando craftear desde el botón: ", receta_actual["name"])
+		craft(receta_actual)
+	else:
+		print("No hay ninguna receta seleccionada")

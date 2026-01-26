@@ -1,6 +1,7 @@
 extends Node2D
 
 var tiempo = 0.0
+var item_type = ""
 
 func _ready() -> void:
 	z_index = 10
@@ -17,25 +18,24 @@ func _process(delta):
 	$Sprite2D.position.y = -5.0 + (sin(tiempo) * 2.0)
 	$Sprite2D.rotation += delta
 
-func configurar(textura_atlas: Vector2i, source_id: int):
+func configurar(textura_atlas: Vector2i, source_id: int, nombre_item: String):
+	item_type = nombre_item
 	$Sprite2D.texture = load("res://sprites001.png")
 	$Sprite2D.region_enabled = true
 	$Sprite2D.scale = Vector2(0.5, 0.5)
 	$Sprite2D.region_rect = Rect2(textura_atlas.x * 16, textura_atlas.y * 16, 16, 16)
 
+@onready var terrain = get_node("../Terrain")
 func _on_body_entered(body):
-	# Verificamos si es el jugador
 	if body.is_in_group("Player"):
-		# Buscamos la hotbar por grupo (asegúrate de que tu Hotbar esté en el grupo "hotbar")
 		var hotbar = get_tree().get_first_node_in_group("Hotbar")
-		
 		if hotbar:
-			# Pasamos la textura recortada del bloque a la hotbar
 			var textura_recortada = AtlasTexture.new()
 			textura_recortada.atlas = $Sprite2D.texture
 			textura_recortada.region = $Sprite2D.region_rect
 			
-			var exito = hotbar.recolect(textura_recortada)
+			textura_recortada.set_meta("object_type", item_type)
+			
+			var exito = hotbar.recolect(textura_recortada, item_type)
 			if exito:
-				print("Objeto recogido")
 				queue_free()
