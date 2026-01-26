@@ -107,55 +107,70 @@ const GRASS = Vector2i(3, 0)
 @onready var item_escena = preload("res://DroppedItem.tscn")
 func minar():
 	var pos_raton = get_global_mouse_position()
+	if global_position.distance_to(pos_raton) > range_minado: return
 	
-	# Comprobar distancia (opcional pero recomendado para DAM)
-	if global_position.distance_to(pos_raton) > range_minado:
-		return
-
 	var pos_mapa = terrain.local_to_map(pos_raton)
-	
-	# Obtenemos los datos del tile en esa posición
 	var tile_data = terrain.get_cell_tile_data(pos_mapa)
 	
 	if tile_data:
-		# Leemos el Custom Data que configuramos en el TileSet
+		# 1. Extraer datos antes de borrar nada
 		var tipo = tile_data.get_custom_data("object_type")
+		var atlas_coords = terrain.get_cell_atlas_coords(pos_mapa)
+		var source_id = terrain.get_cell_source_id(pos_mapa)
+		var item_id = hotbar.dataslots[hotbar.selected_slot]["item"]
 		
-		if (tipo == 'baserock' || tipo == 'dirt_bkg' || tipo == 'rock_bkg'):
+		# 2. Bloqueo de indestructibles
+		if ["baserock", "dirt_bkg", "rock_bkg"].has(tipo):
 			print("No es posible picar: ", tipo)
 			return
+		
+		# 3. FILTRO DE HERRAMIENTA (Para minerales)
+		# Si es mineral y NO tienes pico, detenemos todo aquí
+		print(item_id)
+		var es_mineral = [ "rock", "coal", "iron", "gold", "diamond", "furnace" ].has(tipo)
+		var tiene_pico = [ "woodenpickaxe", "stonepickaxe", "ironpickaxe" ].has(item_id)
+		
+		if es_mineral and not tiene_pico:
+			print("Necesitas un pico para esto")
+			return
+		
+		# 4. PROCESO DE DROPEO (Basado en tus listas originales)
+		if tipo == "tree":
+			terrain.set_cell(Vector2i(pos_mapa.x, pos_mapa.y + 1), 1, Vector2i(5, 5))
+			for x in range(3):
+				soltar_item(Vector2i(pos_mapa.x - 1, pos_mapa.y), STICK, source_id, "stick")
+				soltar_item(Vector2i(pos_mapa.x + 1, pos_mapa.y), WOOD, source_id, "wood")
+		
+		elif tipo == "stump":
+			for x in range(2):
+				soltar_item(Vector2i(pos_mapa.x - 1, pos_mapa.y), STICK, source_id, "stick")
+				soltar_item(Vector2i(pos_mapa.x + 1, pos_mapa.y), WOOD, source_id, "wood")
+		
+		elif [ "grass", "ramp_v1_left", "ramp_v1_right", "ramp_v2_right", "ramp_v2_left", "ramp_v3_left", "ramp_v3_right", "ramp_filler_v1", "ramp_filler_v2" ].has(tipo):
+			soltar_item(Vector2i(pos_mapa.x - 1, pos_mapa.y), GRASS, source_id, "dirt")
+		
+		elif tipo == "coal":
+			soltar_item(pos_mapa, Vector2i(2, 4), source_id, "coal")
+		
+		elif tipo == "diamond":
+			soltar_item(pos_mapa, Vector2i(3, 4), source_id, "diamond")
+		
 		else:
-			print("Picado: ", tipo)
-			
-			var atlas_coords = terrain.get_cell_atlas_coords(pos_mapa)
-			var source_id = terrain.get_cell_source_id(pos_mapa)
-			
-			if tipo == "tree":
-				terrain.set_cell(Vector2i(pos_mapa.x, pos_mapa.y + 1), 1, Vector2i(5, 5))
-				for x in range(3):
-					soltar_item(Vector2i(pos_mapa.x - 1, pos_mapa.y), STICK, source_id, "stick")
-					soltar_item(Vector2i(pos_mapa.x + 1, pos_mapa.y), WOOD, source_id, "wood")
-			elif tipo == "stump":
-				for x in range(2):
-					soltar_item(Vector2i(pos_mapa.x - 1, pos_mapa.y), STICK, source_id, "stick")
-					soltar_item(Vector2i(pos_mapa.x + 1, pos_mapa.y), WOOD, source_id, "wood")
-			elif [ "grass", "ramp_v1_left", "ramp_v1_right", "ramp_v2_right", "ramp_v2_left", "ramp_v3_left", "ramp_v3_right", "ramp_filler_v1", "ramp_filler_v2" ].has(tipo):
-				soltar_item(Vector2i(pos_mapa.x - 1, pos_mapa.y), GRASS, source_id, "dirt")
-			else:
-				soltar_item(pos_mapa, atlas_coords, source_id)
-			
-			# Eliminamos el bloque
-			if (pos_mapa.y >= 6):
-				putBackground(pos_mapa, tipo)
-			elif (pos_mapa.y >= 3):
-				putBackground(pos_mapa, tipo)
-			else:
-				tile_data = terrain.get_cell_tile_data(pos_mapa + Vector2i(0, -1))
-				if (tile_data):
-					tipo = tile_data.get_custom_data("object_type")
-					if (tipo.contains('grassv')):
-						terrain.set_cell(pos_mapa + Vector2i(0, -1), -1)
-				terrain.set_cell(pos_mapa, -1)
+			# Para roca, tierra y todo lo demás
+			soltar_item(pos_mapa, atlas_coords, source_id)
+		
+		# 5. ELIMINACIÓN Y BACKGROUND
+		# Primero gestionamos el fondo o la hierba superior
+		if pos_mapa.y >= 3:
+			putBackground(pos_mapa, tipo)
+		else:
+			# Mirar arriba antes de borrar para quitar la hierba decorativa (grassv)
+			var data_arriba = terrain.get_cell_tile_data(pos_mapa + Vector2i(0, -1))
+			if data_arriba:
+				var tipo_arriba = data_arriba.get_custom_data("object_type")
+				if tipo_arriba.contains('grassv'):
+					terrain.set_cell(pos_mapa + Vector2i(0, -1), -1)
+			terrain.set_cell(pos_mapa, -1)
 
 func putBackground (_position, type):
 	if (type == 'dirt'):
@@ -217,26 +232,32 @@ func gestionar_proceso_minado(delta):
 	var pos_raton = get_global_mouse_position()
 	var pos_mapa = terrain.local_to_map(pos_raton)
 	
-	# Si cambiamos de bloque mientras picamos, reiniciamos el tiempo
 	if pos_mapa != bloque_actual_siendo_picado:
 		tiempo_actual_minado = 0.0
 		bloque_actual_siendo_picado = pos_mapa
 	
-	# Si estamos en rango y hay un bloque
 	if global_position.distance_to(pos_raton) <= range_minado:
 		var tile_data = terrain.get_cell_tile_data(pos_mapa)
 		if tile_data:
-			tiempo_actual_minado += delta
+			# --- LÓGICA DE VELOCIDAD DE MINADO ---
+			var multiplicador = 1.0
+			var item_id = hotbar.dataslots[hotbar.selected_slot]["item"]
 			
-			# EFECTO VISUAL: Hacer que el cursor vibre un poco al picar
+			# Si tienes cualquier pico, el tiempo corre el doble de rápido (tarda la mitad)
+			if ["woodenpickaxe", "stonepickaxe", "ironpickaxe"].has(item_id):
+				multiplicador = 2.0
+			
+			# Sumamos el tiempo multiplicado
+			tiempo_actual_minado += delta * multiplicador
+			# -------------------------------------
+			
 			selector.rotation = randf_range(-0.2, 0.2)
 			
-			# Si hemos llegado al tiempo necesario
-			tile_data = terrain.get_cell_tile_data(pos_mapa)
-			var tipo = tile_data.get_custom_data("break_time")
-			if tiempo_actual_minado >= tipo:
-				minar() # Llamamos a tu función original que borra el bloque
-				tiempo_actual_minado = 0.0 # Reset para el siguiente bloque
+			var tiempo_romper = tile_data.get_custom_data("break_time")
+			
+			if tiempo_actual_minado >= tiempo_romper:
+				minar() 
+				tiempo_actual_minado = 0.0 
 	else:
 		resetear_minado()
 
@@ -248,7 +269,6 @@ func resetear_minado():
 @onready var hotbar = get_tree().get_first_node_in_group("Hotbar")
 func actualizar_selector():
 	var pos_raton = get_global_mouse_position()
-	var pos_mapa = terrain.local_to_map(pos_raton)
 	selector.global_position = pos_raton
 	
 	# --- LÓGICA DE PREVISUALIZACIÓN ---

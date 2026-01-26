@@ -358,7 +358,7 @@ func craft(recipe):
 		var result_texture = obtener_icono_atlas(recipe["icon"])
 		
 		# Enviamos la textura y usamos el "name" como ID (en minúsculas)
-		hotbar.recolect(result_texture, recipe["name"].to_lower()) 
+		hotbar.recolect(result_texture, recipe["id"].to_lower()) 
 		
 		print("Item crafteado: ", recipe["name"])
 		actualizar_lista_crafting() 
