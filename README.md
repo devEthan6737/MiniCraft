@@ -176,4 +176,6 @@ The HUD includes:
 
 ---
 https://etherener.itch.io/minicraft
+https://deepwiki.com/devEthan6737/MiniCraft/1-minicraft-overview
+
 
