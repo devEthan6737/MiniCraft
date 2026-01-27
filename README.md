@@ -175,17 +175,5 @@ The HUD includes:
 * After waiting three times longer than usual, enemies will be able to destroy player-built structures that block their path
 
 ---
-
-[## Development Schedule
-
-### Wednesday – Core Systems
-
-**Milestones:**
-
-* Game Design Document completed
-* Asset creation
-* Procedural generation
-* Player movement
-* Item hotbar and health system
-
 https://etherener.itch.io/minicraft
+
