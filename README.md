@@ -175,7 +175,8 @@ The HUD includes:
 * After waiting three times longer than usual, enemies will be able to destroy player-built structures that block their path
 
 ---
-https://etherener.itch.io/minicraft
-https://deepwiki.com/devEthan6737/MiniCraft/1-minicraft-overview
+- https://etherener.itch.io/minicraft
+- https://deepwiki.com/devEthan6737/MiniCraft/1-minicraft-overview
+
 
 
